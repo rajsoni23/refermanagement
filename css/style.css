@@ -1,1 +1,1162 @@
-:root{--bg:#f5f7fa;--card:#fff;--text:#1f2937;--muted:#6b7280;--border:#e2e6eb;--blue:#2563eb;--blue-dark:#1d4ed8}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Arial,sans-serif;font-size:14px}button,input,select,textarea{font:inherit}button{cursor:pointer}.auth-page{min-height:100vh;display:grid;place-items:center;padding:18px}.auth-card{width:min(410px,100%);background:#fff;border:1px solid var(--border);border-radius:16px;padding:26px;box-shadow:0 8px 30px #1118270c}.brand{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:800;font-size:19px}.brand h1{font-size:18px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:11px}.auth-card h2{margin:25px 0 5px;font-size:22px}.muted{color:var(--muted);font-size:12px;line-height:1.5}.auth-card form{display:grid;gap:13px;margin-top:20px}.auth-card label,.form-grid label,.treatment-fields label{display:grid;gap:6px;font-size:11px;font-weight:700}.auth-card input,.form-grid input,.form-grid select,.form-grid textarea,.treatment-fields input,.filters input,.filters select{width:100%;border:1px solid #d4d9e0;border-radius:9px;padding:10px 11px;background:#fff;outline:0;font-size:13px}.auth-card input:focus,input:focus,select:focus,textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px #2563eb12}.btn{border:0;border-radius:9px;padding:10px 14px;font-weight:700}.primary{background:var(--blue);color:#fff}.primary:hover{background:var(--blue-dark)}.light{background:#f0f2f5;color:#374151}.white{background:#fff;color:#1d4ed8}.full-btn{width:100%;margin-top:4px}.text-btn{border:0;background:transparent;color:var(--blue);padding:10px 0;font-weight:700;font-size:12px}.link-btn{display:block;text-align:center;text-decoration:none}.message{font-size:11px;color:#b91c1c;min-height:16px}.app{max-width:1180px;margin:auto;padding:16px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:16px}.top-actions{display:flex;align-items:center;gap:8px}.user-pill{font-size:11px;background:#fff;border:1px solid var(--border);padding:8px 10px;border-radius:9px}.small{padding:8px 10px;font-size:11px}.hero{display:flex;align-items:center;justify-content:space-between;gap:14px;background:#1f5fc4;color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}.hero h2{margin:0 0 4px;font-size:22px}.hero p{margin:0;color:#dbeafe;font-size:12px}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}.stat{background:#fff;border:1px solid var(--border);border-radius:13px;padding:14px}.stat span{font-size:16px}.stat b{display:block;font-size:23px;margin:6px 0 2px}.stat small{color:var(--muted);font-size:10px}.panel{background:#fff;border:1px solid var(--border);border-radius:15px;padding:16px}.section-head{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:13px}.section-head h3{margin:0;font-size:16px}.filters{display:grid;grid-template-columns:minmax(180px,1fr) 130px 130px;gap:7px;flex:1;max-width:650px}.records{display:grid;gap:9px}.record{border:1px solid var(--border);border-radius:12px;padding:13px}.record-head{display:flex;justify-content:space-between;gap:10px}.record-name{font-weight:800}.record-meta{color:var(--muted);font-size:10px;margin-top:3px}.badge{padding:5px 8px;border-radius:99px;font-size:9px;font-weight:800;height:max-content}.pending{background:#fff7ed;color:#c2410c}.referred{background:#eff6ff;color:#1d4ed8}.started{background:#f5f3ff;color:#6d28d9}.completed{background:#f0fdf4;color:#15803d}.record-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:10px}.record-grid div{background:#f8fafc;border-radius:8px;padding:7px;font-size:10px}.record-grid strong{display:block;color:var(--muted);font-size:8px;margin-bottom:2px}.record-actions{display:flex;gap:7px;margin-top:10px}.empty{text-align:center;padding:35px;color:var(--muted);font-size:12px}.modal{position:fixed;inset:0;background:#11182770;display:none;align-items:center;justify-content:center;padding:15px;z-index:10}.modal.show{display:flex}.modal-card{background:#fff;border-radius:15px;width:min(440px,100%);padding:17px}.modal-card.large{width:min(720px,100%)}.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.modal-head h3{margin:0;font-size:17px}.close{border:0;background:#f1f3f5;width:30px;height:30px;border-radius:8px;font-size:20px;color:#4b5563}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px}.form-grid .full{grid-column:1/-1}.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:15px}.treatment-fields{display:grid;gap:11px;margin-top:12px;padding:11px;background:#f8fafc;border-radius:10px}.treatment-fields[hidden]{display:none!important}@media(max-width:850px){.stats{grid-template-columns:repeat(3,1fr)}.section-head{align-items:stretch;flex-direction:column}.filters{max-width:none;width:100%}}@media(max-width:600px){.app{padding:10px}.topbar{align-items:flex-start}.user-pill{display:none}.hero{padding:16px}.hero h2{font-size:19px}.hero .btn{padding:9px 10px;font-size:11px}.stats{grid-template-columns:repeat(2,1fr)}.stats .stat:last-child{grid-column:1/-1}.filters{grid-template-columns:1fr 1fr}.filters input{grid-column:1/-1}.form-grid{grid-template-columns:1fr}.form-grid .full{grid-column:auto}.record-grid{grid-template-columns:1fr 1fr}}
+:root {
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #1f2937;
+    --muted: #6b7280;
+    --border: #e2e6eb;
+
+    --blue: #2563eb;
+    --blue-dark: #1d4ed8;
+    --blue-light: #eff6ff;
+
+    --green: #15803d;
+    --orange: #c2410c;
+    --purple: #6d28d9;
+    --red: #b91c1c;
+
+    --radius: 12px;
+}
+
+
+/* =========================================================
+   RESET
+========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    min-height: 100%;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    background: var(--bg);
+    color: var(--text);
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Arial,
+        sans-serif;
+
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+button,
+input,
+select,
+textarea {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+a {
+    color: inherit;
+}
+
+
+/* =========================================================
+   COMMON BRAND
+========================================================= */
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+}
+
+.logo,
+.brand-logo {
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+    place-items: center;
+
+    background: var(--blue);
+    color: #ffffff;
+
+    border-radius: 10px;
+
+    font-size: 19px;
+    font-weight: 800;
+}
+
+.brand h1 {
+    margin: 0;
+
+    font-size: 18px;
+    font-weight: 750;
+
+    color: var(--text);
+}
+
+.brand p {
+    margin: 2px 0 0;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   LOGIN PAGE
+========================================================= */
+
+.login-page {
+    min-height: 100vh;
+
+    display: grid;
+    place-items: center;
+
+    padding: 20px;
+}
+
+.login-card {
+    width: min(410px, 100%);
+
+    background: var(--card);
+
+    border: 1px solid var(--border);
+    border-radius: 16px;
+
+    padding: 28px;
+
+    box-shadow: 0 10px 35px rgba(17, 24, 39, 0.07);
+}
+
+.login-heading {
+    margin-top: 28px;
+    margin-bottom: 20px;
+}
+
+.login-heading h2 {
+    margin: 0 0 5px;
+
+    font-size: 22px;
+    font-weight: 750;
+}
+
+.login-heading p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 12px;
+    line-height: 1.55;
+}
+
+
+/* =========================================================
+   FORM ELEMENTS
+========================================================= */
+
+.form-group {
+    display: grid;
+    gap: 6px;
+
+    margin-bottom: 14px;
+}
+
+.form-group label,
+.login-card label {
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.login-card input,
+.login-card select,
+.login-card textarea {
+    width: 100%;
+
+    border: 1px solid #d4d9e0;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    padding: 10px 11px;
+
+    outline: none;
+
+    color: var(--text);
+
+    font-size: 13px;
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+.login-card input::placeholder {
+    color: #9ca3af;
+}
+
+.login-card input:focus,
+.login-card select:focus,
+.login-card textarea:focus {
+    border-color: var(--blue);
+
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================================================
+   PASSWORD
+========================================================= */
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-right: 65px;
+}
+
+.password-toggle {
+    position: absolute;
+
+    right: 7px;
+    top: 50%;
+
+    transform: translateY(-50%);
+
+    border: 0;
+
+    background: transparent;
+
+    color: var(--blue);
+
+    font-size: 11px;
+    font-weight: 700;
+
+    padding: 5px 7px;
+}
+
+.password-toggle:hover {
+    color: var(--blue-dark);
+}
+
+
+/* =========================================================
+   LOGIN BUTTON
+========================================================= */
+
+.login-button {
+    width: 100%;
+
+    border: 0;
+    border-radius: 9px;
+
+    background: var(--blue);
+    color: #ffffff;
+
+    padding: 11px 14px;
+
+    font-size: 13px;
+    font-weight: 700;
+
+    transition:
+        background 0.15s ease,
+        transform 0.05s ease;
+}
+
+.login-button:hover {
+    background: var(--blue-dark);
+}
+
+.login-button:active {
+    transform: translateY(1px);
+}
+
+.login-button:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+
+/* =========================================================
+   LOGIN LINKS / MESSAGES
+========================================================= */
+
+.login-links {
+    display: flex;
+    justify-content: center;
+
+    margin-top: 12px;
+}
+
+.link-button,
+.text-btn {
+    border: 0;
+    background: transparent;
+
+    color: var(--blue);
+
+    padding: 8px 0;
+
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.link-button:hover,
+.text-btn:hover {
+    color: var(--blue-dark);
+}
+
+.register-section {
+    margin-top: 20px;
+    padding-top: 18px;
+
+    border-top: 1px solid var(--border);
+
+    text-align: center;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+.register-section a {
+    margin-left: 4px;
+
+    color: var(--blue);
+
+    text-decoration: none;
+
+    font-weight: 700;
+}
+
+.register-section a:hover {
+    text-decoration: underline;
+}
+
+.login-footer {
+    margin-top: 22px;
+
+    text-align: center;
+}
+
+.login-footer p {
+    margin: 0;
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+.login-footer span {
+    display: block;
+
+    margin-top: 3px;
+
+    color: #9ca3af;
+
+    font-size: 9px;
+}
+
+.login-message,
+.message {
+    min-height: 17px;
+
+    margin: 5px 0 8px;
+
+    color: var(--red);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   COMMON BUTTONS
+========================================================= */
+
+.btn {
+    border: 0;
+    border-radius: 9px;
+
+    padding: 10px 14px;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    transition:
+        background 0.15s ease,
+        transform 0.05s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.primary {
+    background: var(--blue);
+    color: #ffffff;
+}
+
+.primary:hover {
+    background: var(--blue-dark);
+}
+
+.light {
+    background: #f0f2f5;
+    color: #374151;
+}
+
+.light:hover {
+    background: #e5e7eb;
+}
+
+.white {
+    background: #ffffff;
+    color: var(--blue);
+}
+
+.white:hover {
+    background: #f8fafc;
+}
+
+.full-btn {
+    width: 100%;
+}
+
+
+/* =========================================================
+   DASHBOARD APP
+========================================================= */
+
+.app {
+    width: 100%;
+    max-width: 1180px;
+
+    margin: 0 auto;
+
+    padding: 16px;
+}
+
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 16px;
+}
+
+.top-actions {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+}
+
+.user-pill {
+    padding: 8px 10px;
+
+    background: #ffffff;
+
+    border: 1px solid var(--border);
+    border-radius: 9px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+
+/* =========================================================
+   DASHBOARD HERO
+========================================================= */
+
+.hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 15px;
+
+    padding: 20px;
+
+    margin-bottom: 14px;
+
+    background: #1f5fc4;
+    color: #ffffff;
+
+    border-radius: 16px;
+}
+
+.hero h2 {
+    margin: 0 0 4px;
+
+    font-size: 22px;
+    font-weight: 750;
+}
+
+.hero p {
+    margin: 0;
+
+    color: #dbeafe;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   DASHBOARD STAT CARDS
+========================================================= */
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+
+    gap: 10px;
+
+    margin-bottom: 14px;
+}
+
+.stat {
+    background: var(--card);
+
+    border: 1px solid var(--border);
+    border-radius: 13px;
+
+    padding: 14px;
+}
+
+.stat span {
+    font-size: 16px;
+}
+
+.stat b {
+    display: block;
+
+    margin: 6px 0 2px;
+
+    font-size: 23px;
+    font-weight: 750;
+}
+
+.stat small {
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+
+/* =========================================================
+   PANEL
+========================================================= */
+
+.panel {
+    background: var(--card);
+
+    border: 1px solid var(--border);
+    border-radius: 15px;
+
+    padding: 16px;
+}
+
+.section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 13px;
+}
+
+.section-head h3 {
+    margin: 0;
+
+    font-size: 16px;
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   FILTERS
+========================================================= */
+
+.filters {
+    display: grid;
+
+    grid-template-columns:
+        minmax(180px, 1fr)
+        130px
+        130px;
+
+    gap: 7px;
+
+    flex: 1;
+
+    max-width: 650px;
+}
+
+.filters input,
+.filters select {
+    width: 100%;
+
+    border: 1px solid #d4d9e0;
+    border-radius: 9px;
+
+    padding: 9px 10px;
+
+    background: #ffffff;
+
+    color: var(--text);
+
+    outline: none;
+
+    font-size: 12px;
+}
+
+.filters input:focus,
+.filters select:focus {
+    border-color: var(--blue);
+
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================================================
+   REFERRAL RECORDS
+========================================================= */
+
+.records {
+    display: grid;
+
+    gap: 9px;
+}
+
+.record {
+    padding: 13px;
+
+    border: 1px solid var(--border);
+    border-radius: 12px;
+
+    background: #ffffff;
+}
+
+.record-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.record-name {
+    font-size: 13px;
+    font-weight: 800;
+}
+
+.record-meta {
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+.record-grid {
+    display: grid;
+
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 7px;
+
+    margin-top: 10px;
+}
+
+.record-grid div {
+    padding: 8px;
+
+    background: #f8fafc;
+
+    border-radius: 8px;
+
+    font-size: 10px;
+}
+
+.record-grid strong {
+    display: block;
+
+    margin-bottom: 2px;
+
+    color: var(--muted);
+
+    font-size: 8px;
+    font-weight: 700;
+}
+
+.record-actions {
+    display: flex;
+
+    gap: 7px;
+
+    margin-top: 10px;
+}
+
+
+/* =========================================================
+   STATUS BADGES
+========================================================= */
+
+.badge {
+    height: max-content;
+
+    padding: 5px 8px;
+
+    border-radius: 99px;
+
+    font-size: 9px;
+    font-weight: 800;
+
+    white-space: nowrap;
+}
+
+.pending {
+    background: #fff7ed;
+    color: var(--orange);
+}
+
+.referred {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.started {
+    background: #f5f3ff;
+    color: var(--purple);
+}
+
+.completed {
+    background: #f0fdf4;
+    color: var(--green);
+}
+
+.empty {
+    padding: 35px;
+
+    color: var(--muted);
+
+    text-align: center;
+
+    font-size: 12px;
+}
+
+
+/* =========================================================
+   MODALS
+========================================================= */
+
+.modal {
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+    align-items: center;
+    justify-content: center;
+
+    padding: 15px;
+
+    background: rgba(17, 24, 39, 0.70);
+
+    z-index: 1000;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-card {
+    width: min(440px, 100%);
+
+    max-height: calc(100vh - 30px);
+
+    overflow-y: auto;
+
+    padding: 18px;
+
+    background: #ffffff;
+
+    border-radius: 15px;
+
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18);
+}
+
+.modal-card.large {
+    width: min(720px, 100%);
+}
+
+.modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+.modal-head h3 {
+    margin: 0;
+
+    font-size: 17px;
+    font-weight: 750;
+}
+
+.close {
+    width: 30px;
+    height: 30px;
+
+    border: 0;
+    border-radius: 8px;
+
+    background: #f1f3f5;
+
+    color: #4b5563;
+
+    font-size: 20px;
+    line-height: 1;
+}
+
+.close:hover {
+    background: #e5e7eb;
+}
+
+
+/* =========================================================
+   REFERRAL FORM
+========================================================= */
+
+.form-grid {
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 11px;
+}
+
+.form-grid .full {
+    grid-column: 1 / -1;
+}
+
+.form-grid label {
+    display: grid;
+
+    gap: 6px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea {
+    width: 100%;
+
+    border: 1px solid #d4d9e0;
+    border-radius: 9px;
+
+    padding: 10px 11px;
+
+    background: #ffffff;
+
+    color: var(--text);
+
+    outline: none;
+
+    font-size: 13px;
+
+    resize: vertical;
+}
+
+.form-grid input:focus,
+.form-grid select:focus,
+.form-grid textarea:focus {
+    border-color: var(--blue);
+
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+.form-grid textarea {
+    min-height: 75px;
+}
+
+.modal-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 8px;
+
+    margin-top: 16px;
+}
+
+
+/* =========================================================
+   TREATMENT / HOSPITAL FIELDS
+========================================================= */
+
+.treatment-fields {
+    display: grid;
+
+    gap: 11px;
+
+    margin-top: 12px;
+
+    padding: 12px;
+
+    background: #f8fafc;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+}
+
+.treatment-fields[hidden] {
+    display: none !important;
+}
+
+.treatment-fields label {
+    display: grid;
+
+    gap: 6px;
+
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.treatment-fields input {
+    width: 100%;
+
+    border: 1px solid #d4d9e0;
+    border-radius: 9px;
+
+    padding: 10px 11px;
+
+    background: #ffffff;
+
+    outline: none;
+
+    font-size: 13px;
+}
+
+.treatment-fields input:focus {
+    border-color: var(--blue);
+
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+}
+
+
+/* =========================================================
+   HIDDEN UTILITY
+========================================================= */
+
+[hidden] {
+    display: none !important;
+}
+
+
+/* =========================================================
+   TABLET
+========================================================= */
+
+@media (max-width: 850px) {
+
+    .stats {
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    .section-head {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .filters {
+        width: 100%;
+        max-width: none;
+    }
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    body {
+        font-size: 13px;
+    }
+
+    .login-page {
+        padding: 12px;
+    }
+
+    .login-card {
+        padding: 22px 18px;
+        border-radius: 14px;
+    }
+
+    .login-heading {
+        margin-top: 24px;
+    }
+
+    .login-heading h2 {
+        font-size: 20px;
+    }
+
+    .app {
+        padding: 10px;
+    }
+
+    .topbar {
+        align-items: flex-start;
+    }
+
+    .topbar .brand h1 {
+        font-size: 16px;
+    }
+
+    .topbar .brand p {
+        font-size: 9px;
+    }
+
+    .user-pill {
+        display: none;
+    }
+
+    .hero {
+        padding: 16px;
+
+        border-radius: 14px;
+    }
+
+    .hero h2 {
+        font-size: 19px;
+    }
+
+    .hero p {
+        font-size: 11px;
+    }
+
+    .hero .btn {
+        padding: 9px 10px;
+
+        font-size: 11px;
+    }
+
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .stats .stat:last-child {
+        grid-column: 1 / -1;
+    }
+
+    .stat {
+        padding: 12px;
+    }
+
+    .stat b {
+        font-size: 21px;
+    }
+
+    .panel {
+        padding: 13px;
+
+        border-radius: 14px;
+    }
+
+    .filters {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .filters input {
+        grid-column: 1 / -1;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-grid .full {
+        grid-column: auto;
+    }
+
+    .modal {
+        align-items: flex-end;
+
+        padding: 8px;
+    }
+
+    .modal-card,
+    .modal-card.large {
+        width: 100%;
+
+        max-height: calc(100vh - 16px);
+
+        border-radius: 15px;
+    }
+
+    .record-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .record-actions {
+        flex-wrap: wrap;
+    }
+
+}
+
+
+/* =========================================================
+   VERY SMALL PHONES
+========================================================= */
+
+@media (max-width: 380px) {
+
+    .login-card {
+        padding: 20px 15px;
+    }
+
+    .brand-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .brand h1 {
+        font-size: 16px;
+    }
+
+    .hero {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .hero .btn {
+        width: 100%;
+    }
+
+    .record-grid {
+        grid-template-columns: 1fr;
+    }
+
+}
