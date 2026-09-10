@@ -110,87 +110,37 @@
         <section class="stats">
 
             <div class="stat">
-
-                <span aria-hidden="true">
-                    📋
-                </span>
-
-                <b id="total">
-                    0
-                </b>
-
-                <small>
-                    Total Referrals
-                </small>
-
+                <span>📋</span>
+                <b id="total">0</b>
+                <small>Total Referrals</small>
             </div>
 
 
             <div class="stat">
-
-                <span aria-hidden="true">
-                    ⏳
-                </span>
-
-                <b id="pending">
-                    0
-                </b>
-
-                <small>
-                    Pending
-                </small>
-
+                <span>⏳</span>
+                <b id="pending">0</b>
+                <small>Pending</small>
             </div>
 
 
             <div class="stat">
-
-                <span aria-hidden="true">
-                    📤
-                </span>
-
-                <b id="referred">
-                    0
-                </b>
-
-                <small>
-                    Referred
-                </small>
-
+                <span>📤</span>
+                <b id="referred">0</b>
+                <small>Referred</small>
             </div>
 
 
             <div class="stat">
-
-                <span aria-hidden="true">
-                    🏥
-                </span>
-
-                <b id="started">
-                    0
-                </b>
-
-                <small>
-                    Treatment Started
-                </small>
-
+                <span>🏥</span>
+                <b id="started">0</b>
+                <small>Treatment Started</small>
             </div>
 
 
             <div class="stat">
-
-                <span aria-hidden="true">
-                    ✓
-                </span>
-
-                <b id="completed">
-                    0
-                </b>
-
-                <small>
-                    Completed
-                </small>
-
+                <span>✓</span>
+                <b id="completed">0</b>
+                <small>Completed</small>
             </div>
 
         </section>
@@ -218,7 +168,7 @@
                     <input
                         type="search"
                         id="search"
-                        placeholder="Search child or institute..."
+                        placeholder="Search child, institute, problem..."
                         autocomplete="off"
                     >
 
@@ -280,7 +230,7 @@
 
 
     <!-- =========================================================
-         NEW REFERRAL MODAL
+         NEW / EDIT REFERRAL MODAL
     ========================================================== -->
 
     <div
@@ -293,7 +243,7 @@
 
             <div class="modal-head">
 
-                <h3>
+                <h3 id="referralModalTitle">
                     New Referral
                 </h3>
 
@@ -511,60 +461,25 @@
                                 Select Class
                             </option>
 
-                            <option value="1">
-                                1
-                            </option>
-
-                            <option value="2">
-                                2
-                            </option>
-
-                            <option value="3">
-                                3
-                            </option>
-
-                            <option value="4">
-                                4
-                            </option>
-
-                            <option value="5">
-                                5
-                            </option>
-
-                            <option value="6">
-                                6
-                            </option>
-
-                            <option value="7">
-                                7
-                            </option>
-
-                            <option value="8">
-                                8
-                            </option>
-
-                            <option value="9">
-                                9
-                            </option>
-
-                            <option value="10">
-                                10
-                            </option>
-
-                            <option value="11">
-                                11
-                            </option>
-
-                            <option value="12">
-                                12
-                            </option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
 
                         </select>
 
                     </label>
 
 
-                    <!-- AWC Worker Number -->
+                    <!-- AWC Worker -->
                     <label
                         id="awcWrap"
                         hidden
@@ -627,7 +542,6 @@
                 </div>
 
 
-                <!-- Form Actions -->
                 <div class="modal-actions">
 
                     <button
@@ -640,6 +554,7 @@
 
                     <button
                         type="submit"
+                        id="saveReferralButton"
                         class="btn primary"
                     >
                         Save Referral
@@ -686,7 +601,6 @@
 
             <form id="statusForm">
 
-                <!-- Status -->
                 <label>
 
                     Status
@@ -714,7 +628,6 @@
                 </label>
 
 
-                <!-- Treatment Details -->
                 <div
                     id="treatmentFields"
                     class="treatment-fields"
@@ -749,7 +662,6 @@
                 </div>
 
 
-                <!-- Form Actions -->
                 <div class="modal-actions">
 
                     <button
@@ -777,7 +689,161 @@
 
 
     <!-- =========================================================
-         DASHBOARD LOGIC
+         VIEW DETAILS MODAL
+    ========================================================== -->
+
+    <div
+        id="detailsModal"
+        class="modal"
+        aria-hidden="true"
+    >
+
+        <div class="modal-card large">
+
+            <div class="modal-head">
+
+                <div>
+
+                    <h3>
+                        Referral Details
+                    </h3>
+
+                    <p
+                        id="detailsSubtitle"
+                        class="muted"
+                    >
+                        Complete child referral information
+                    </p>
+
+                </div>
+
+
+                <button
+                    type="button"
+                    class="close"
+                    data-close="detailsModal"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div
+                id="detailsContent"
+                class="details-content"
+            >
+
+                <!-- Filled dynamically by dashboard.js -->
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn light"
+                    data-close="detailsModal"
+                >
+                    Close
+                </button>
+
+                <button
+                    type="button"
+                    id="detailsEdit"
+                    class="btn primary"
+                >
+                    Edit Referral
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         DELETE CONFIRMATION MODAL
+    ========================================================== -->
+
+    <div
+        id="deleteModal"
+        class="modal"
+        aria-hidden="true"
+    >
+
+        <div class="modal-card delete-card">
+
+            <div class="modal-head">
+
+                <h3>
+                    Delete Referral
+                </h3>
+
+                <button
+                    type="button"
+                    class="close"
+                    data-close="deleteModal"
+                    aria-label="Close"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+            <div class="delete-warning">
+
+                <div class="delete-icon">
+                    !
+                </div>
+
+                <h4>
+                    Are you sure?
+                </h4>
+
+                <p>
+                    You are about to permanently delete this referral record.
+                    This action cannot be undone.
+                </p>
+
+                <strong id="deleteChildName">
+                    -
+                </strong>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn light"
+                    data-close="deleteModal"
+                >
+                    Cancel
+                </button>
+
+                <button
+                    type="button"
+                    id="confirmDelete"
+                    class="btn danger"
+                >
+                    Delete Referral
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================================================
+         DASHBOARD JAVASCRIPT
     ========================================================== -->
 
     <script
