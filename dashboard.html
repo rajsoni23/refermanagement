@@ -6,7 +6,7 @@
 <title>Dashboard | Shree RBSK</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
-.defect-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid #dfe5ee;padding:10px;border-radius:12px;background:#f8fafc}.defect-item{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid #e8edf4;border-radius:9px;padding:9px;cursor:pointer;font-size:12px}.defect-item input{margin-top:2px}.other-box{margin-top:9px}.other-box input{width:100%}.upload-box{border:1px dashed #9fb1c9;border-radius:12px;padding:12px;background:#f8fafc}.upload-box input[type=file]{width:100%}.file-list{display:flex;flex-direction:column;gap:7px;margin-top:9px}.file-item{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#fff;border:1px solid #e5e7eb;border-radius:9px;padding:8px 10px;font-size:11px}.file-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-remove{border:0;background:#fee2e2;color:#b91c1c;border-radius:7px;padding:5px 8px;cursor:pointer}.hidden{display:none!important}@media(max-width:600px){.defect-list{grid-template-columns:1fr}}
+.defect-list{display:grid;grid-template-columns:1fr 1fr;gap:8px;border:1px solid #dfe5ee;padding:10px;border-radius:12px;background:#f8fafc}.defect-item{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid #e8edf4;border-radius:9px;padding:9px;cursor:pointer;font-size:12px}.defect-item input{margin-top:2px}.other-box{margin-top:9px}.other-box input{width:100%}.hidden{display:none!important}@media(max-width:600px){.defect-list{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -54,7 +54,7 @@
 <label>Mobile 1<input type="tel" id="mobile1" maxlength="10" inputmode="numeric"></label>
 <label>Mobile 2<input type="tel" id="mobile2" maxlength="10" inputmode="numeric"></label>
 <label class="full"><span id="mobile3Label">Mobile 3</span><input type="tel" id="mobile3" maxlength="10" inputmode="numeric"></label>
-<label class="full">Documents / Attachments<div class="upload-box"><input type="file" id="documentFiles" multiple accept="image/jpeg,image/png,image/webp,application/pdf"><div class="file-list" id="fileList"></div></div></label>
+
 </div><div class="modal-actions"><button type="button" class="btn light" data-close="referralModal">Cancel</button><button type="submit" id="saveReferralButton" class="btn primary">Save Referral</button></div></form></div></div>
 
 <div id="statusModal" class="modal" aria-hidden="true"><div class="modal-card"><div class="modal-head"><h3>Update Status</h3><button type="button" class="close" data-close="statusModal">×</button></div><form id="statusForm">
