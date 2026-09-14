@@ -361,6 +361,38 @@
                     </label>
 
 
+                    <!-- Father Aadhaar -->
+                    <label>
+
+                        Father Aadhaar Number
+
+                        <input
+                            type="tel"
+                            id="fatherAadhaar"
+                            maxlength="12"
+                            inputmode="numeric"
+                            placeholder="12 digit Aadhaar number"
+                        >
+
+                    </label>
+
+
+                    <!-- Mother Aadhaar -->
+                    <label>
+
+                        Mother Aadhaar Number
+
+                        <input
+                            type="tel"
+                            id="motherAadhaar"
+                            maxlength="12"
+                            inputmode="numeric"
+                            placeholder="12 digit Aadhaar number"
+                        >
+
+                    </label>
+
+
                     <!-- Weight -->
                     <label>
 
@@ -391,17 +423,40 @@
                     </label>
 
 
-                    <!-- Defect -->
-                    <label class="full">
+                    <!-- Defect / Health Conditions -->
+                    <div class="full form-field-block">
 
-                        Defect / Health Problem *
+                        <span class="form-label">Defect / Health Condition *</span>
 
-                        <textarea
-                            id="defect"
-                            rows="3"
-                            required
-                            placeholder="Enter identified defect / health problem"
-                        ></textarea>
+                        <div class="condition-list" id="defectList">
+                            <label><input type="checkbox" value="1 - Neural Tube Defect"> <span><b>1</b> Neural Tube Defect</span></label>
+                            <label><input type="checkbox" value="2 - Downs Syndrome"> <span><b>2</b> Downs Syndrome</span></label>
+                            <label><input type="checkbox" value="3 - Cleft Lip and Palate"> <span><b>3</b> Cleft Lip and Palate</span></label>
+                            <label><input type="checkbox" value="4 - Talipes (club foot)"> <span><b>4</b> Talipes (club foot)</span></label>
+                            <label><input type="checkbox" value="5 - Developmental Dysplasia of Hip"> <span><b>5</b> Developmental Dysplasia of Hip</span></label>
+                            <label><input type="checkbox" value="6 - Congenital Cataract"> <span><b>6</b> Congenital Cataract</span></label>
+                            <label><input type="checkbox" value="7 - Congenital Deafness"> <span><b>7</b> Congenital Deafness</span></label>
+                            <label><input type="checkbox" value="8 - Congenital Heart Disease"> <span><b>8</b> Congenital Heart Disease</span></label>
+                            <label><input type="checkbox" value="9 - Retinopathy of Prematurity (only at DH)"> <span><b>9</b> Retinopathy of Prematurity (only at DH)</span></label>
+                            <label><input type="checkbox" value="47 - Congenital Ear Problems"> <span><b>47</b> Congenital Ear Problems</span></label>
+                            <label><input type="checkbox" value="48 - Neck and Face Defects"> <span><b>48</b> Neck and Face Defects</span></label>
+                            <label><input type="checkbox" value="50 - Congenital Eye Problems"> <span><b>50</b> Congenital Eye Problems</span></label>
+                            <label><input type="checkbox" value="Other Health Condition"> <span>Other Health Condition</span></label>
+                        </div>
+
+                    </div>
+
+
+                    <!-- Village -->
+                    <label>
+
+                        Village Name
+
+                        <input
+                            type="text"
+                            id="villageName"
+                            placeholder="Enter village name"
+                        >
 
                     </label>
 
@@ -528,7 +583,7 @@
                     <!-- Mobile 3 -->
                     <label class="full">
 
-                        Mobile 3
+                        <span id="mobile3Label">AWC / School Principal Mobile Number</span>
 
                         <input
                             type="tel"
@@ -628,20 +683,44 @@
                 </label>
 
 
+                <div id="referralTypeWrap" class="treatment-fields" hidden>
+
+                    <label>
+                        Refer Type
+                        <select id="referralType">
+                            <option value="">Select Refer Type</option>
+                            <option value="Refer to DEIC">Refer to DEIC</option>
+                            <option value="Refer to Private Hospital">Refer to Private Hospital</option>
+                        </select>
+                    </label>
+
+                    <label id="hospitalSelectWrap" hidden>
+                        Private Hospital
+                        <select id="hospitalSelect">
+                            <option value="">Select Hospital</option>
+                            <option value="Arvindo Hospital">Arvindo Hospital</option>
+                            <option value="Bhandari Hospital">Bhandari Hospital</option>
+                            <option value="Medanta Hospital">Medanta Hospital</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </label>
+
+                    <label id="otherHospitalWrap" hidden>
+                        Other Hospital Name
+                        <input type="text" id="otherHospitalName" placeholder="Enter hospital name">
+                    </label>
+
+                </div>
+
+
                 <div
                     id="treatmentFields"
                     class="treatment-fields"
                 >
 
-                    <label>
-
-                        Hospital Name *
-
-                        <input
-                            type="text"
-                            id="hospitalName"
-                        >
-
+                    <label id="hospitalLegacyWrap" hidden>
+                        Hospital Name
+                        <input type="hidden" id="hospitalName">
                     </label>
 
 
