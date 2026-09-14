@@ -1812,3 +1812,412 @@ textarea::placeholder {
 /* RBSK health condition selector */
 .form-field-block{display:flex;flex-direction:column;gap:8px}.form-label{font-weight:700;font-size:13px}.condition-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;border:1px solid #dfe4ec;border-radius:12px;background:#f8fafc;padding:8px}.condition-list label{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid #edf0f4;border-radius:9px;padding:9px;cursor:pointer;font-size:12px}.condition-list input{width:17px;height:17px;accent-color:#2563eb;margin:0;flex:none}.condition-list b{color:#2563eb;margin-right:4px}.condition-list label:has(input:checked){border-color:#93c5fd;background:#eff6ff}
 @media(max-width:650px){.condition-list{grid-template-columns:1fr}}
+
+/* =========================================================
+   SHREE RBSK — PREMIUM UI ENHANCEMENT
+   Student cards + Status workflow + Modal polish
+   ========================================================= */
+
+/* ---------- PREMIUM STUDENT CARD ---------- */
+.record {
+    position: relative;
+    overflow: hidden;
+    padding: 0;
+    border: 1px solid #e2e8f2;
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, #ffffff 0%, #fbfcff 100%);
+    box-shadow:
+        0 4px 14px rgba(25, 42, 70, .045),
+        0 1px 2px rgba(25, 42, 70, .04);
+}
+
+.record::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: linear-gradient(90deg, #356df3, #7557d9, #15946a);
+    opacity: .9;
+}
+
+.record:hover {
+    transform: translateY(-2px);
+    border-color: #cfd9e8;
+    box-shadow:
+        0 14px 32px rgba(25, 42, 70, .09),
+        0 2px 6px rgba(25, 42, 70, .04);
+}
+
+.record-head {
+    padding: 18px 18px 13px;
+    background:
+        radial-gradient(circle at 92% 0%, rgba(53,109,243,.08), transparent 28%),
+        linear-gradient(180deg, #fff, #fcfdff);
+}
+
+.record-head > div:first-child {
+    min-width: 0;
+}
+
+.record-name {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #14213a;
+    font-size: 15px;
+    font-weight: 850;
+    letter-spacing: -.25px;
+}
+
+.record-name::before {
+    content: "S";
+    display: grid;
+    place-items: center;
+    width: 31px;
+    height: 31px;
+    flex: 0 0 31px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #edf3ff, #e7edff);
+    border: 1px solid #dbe5fb;
+    color: #356df3;
+    font-size: 11px;
+    font-weight: 900;
+}
+
+.record-meta {
+    margin: 6px 0 0 40px;
+    color: #7c879b;
+    font-size: 10px;
+    line-height: 1.5;
+}
+
+.record .badge {
+    box-shadow: 0 2px 7px rgba(25,42,70,.06);
+}
+
+/* ---------- CARD INFORMATION AREA ---------- */
+.record-grid {
+    margin: 0;
+    padding: 0 18px 14px;
+    gap: 8px;
+}
+
+.record-grid div {
+    min-height: 58px;
+    padding: 10px 11px;
+    background: #f8faff;
+    border: 1px solid #e9eef6;
+    border-radius: 11px;
+    transition: .15s ease;
+}
+
+.record-grid div:hover {
+    background: #f4f7fd;
+    border-color: #dce5f2;
+}
+
+.record-grid strong {
+    color: #9aa5b7;
+    font-size: 8px;
+    letter-spacing: .5px;
+}
+
+.record-grid div:not(:has(strong)) {
+    color: #26334b;
+}
+
+/* ---------- CARD ACTION BAR ---------- */
+.record-actions {
+    margin: 0;
+    padding: 12px 18px 16px;
+    border-top: 1px solid #edf1f6;
+    background: rgba(248,250,253,.72);
+}
+
+.record-actions .btn {
+    border: 1px solid #e1e7f0;
+    box-shadow: 0 2px 5px rgba(25,42,70,.035);
+}
+
+.record-actions .btn:hover {
+    box-shadow: 0 5px 12px rgba(25,42,70,.08);
+}
+
+.record-actions .btn:first-child {
+    color: #356df3;
+    background: #eef4ff;
+    border-color: #dce8ff;
+}
+
+.record-actions .btn:nth-child(3) {
+    color: #7557d9;
+    background: #f3f0ff;
+    border-color: #e7e1ff;
+}
+
+/* ---------- PREMIUM STATUS BADGES ---------- */
+.badge {
+    min-height: 29px;
+    padding: 6px 11px;
+    border: 1px solid transparent;
+    font-size: 9px;
+    letter-spacing: .15px;
+}
+
+.badge.pending {
+    background: linear-gradient(135deg, #fff7ea, #fff2dc);
+    border-color: #ffe4b7;
+}
+
+.badge.referred {
+    background: linear-gradient(135deg, #eef4ff, #e7efff);
+    border-color: #d8e5ff;
+}
+
+.badge.started {
+    background: linear-gradient(135deg, #f3efff, #eee9ff);
+    border-color: #e2d9ff;
+}
+
+.badge.completed {
+    background: linear-gradient(135deg, #ebfaf3, #e5f7ef);
+    border-color: #d1efdf;
+}
+
+/* ---------- STATUS UPDATE MODAL ---------- */
+#statusModal .modal-card {
+    width: min(500px, 100%);
+}
+
+#statusModal .modal-head {
+    padding-bottom: 13px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid #edf1f6;
+}
+
+#statusModal .modal-head h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+}
+
+#statusModal .modal-head h3::before {
+    content: "↻";
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #edf3ff;
+    color: #356df3;
+    font-size: 19px;
+    font-weight: 800;
+}
+
+#statusForm > label {
+    padding: 12px;
+    background: #f8faff;
+    border: 1px solid #e7ecf4;
+    border-radius: 12px;
+}
+
+#statusForm select,
+#statusForm input {
+    background: #fff;
+}
+
+#referTypeWrap {
+    margin-top: 12px;
+    padding: 13px;
+    background: #f8faff;
+    border: 1px solid #e3e9f3;
+    border-radius: 13px;
+}
+
+#privateHospitalWrap,
+#otherHospitalWrap,
+#treatmentFields {
+    animation: statusFieldIn .18s ease;
+}
+
+@keyframes statusFieldIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+#treatmentFields {
+    margin-top: 12px;
+    padding: 15px;
+    background:
+        radial-gradient(circle at 100% 0%, rgba(117,87,217,.06), transparent 35%),
+        linear-gradient(135deg, #fafbff, #f5f8fc);
+    border: 1px solid #dfe6f1;
+    border-radius: 14px;
+}
+
+#treatmentFields label {
+    color: #34415a;
+}
+
+#treatmentFields input {
+    min-height: 44px;
+}
+
+/* Status flow visual cue */
+#newStatus option[value="Pending"] { color: #e88925; }
+#newStatus option[value="Referred"] { color: #356df3; }
+#newStatus option[value="Treatment Started"] { color: #7557d9; }
+#newStatus option[value="Completed"] { color: #15946a; }
+
+/* ---------- DETAILS MODAL PREMIUM ---------- */
+#detailsModal .modal-card {
+    width: min(820px, 100%);
+}
+
+#detailsModal .modal-head {
+    padding: 3px 2px 15px;
+    border-bottom: 1px solid #edf1f6;
+}
+
+#detailsModal .details-content {
+    margin-top: 15px;
+}
+
+.details-section {
+    box-shadow: 0 2px 8px rgba(25,42,70,.025);
+}
+
+.details-section h4 {
+    letter-spacing: .1px;
+}
+
+.details-row strong {
+    color: #25334c;
+}
+
+/* ---------- PREMIUM DELETE MODAL ---------- */
+#deleteModal .modal-card {
+    border-top: 4px solid #d9485f;
+}
+
+/* ---------- BETTER MODAL FOOTERS ---------- */
+.modal-actions {
+    position: sticky;
+    bottom: -21px;
+    z-index: 2;
+    margin-left: -21px;
+    margin-right: -21px;
+    margin-bottom: -21px;
+    padding: 13px 21px 16px;
+    background: rgba(255,255,255,.94);
+    backdrop-filter: blur(8px);
+}
+
+.modal-actions .btn {
+    min-width: 110px;
+}
+
+/* ---------- COMPACT DEFECT SELECTOR ---------- */
+#defectList,
+.condition-list {
+    max-height: 255px;
+    overflow-y: auto;
+}
+
+#defectList label,
+.condition-list label {
+    min-height: 38px;
+    padding: 7px 8px;
+    font-size: 11px;
+}
+
+#defectList input[type="checkbox"],
+.condition-list input {
+    width: 15px;
+    height: 15px;
+}
+
+/* ---------- MOBILE CARD ---------- */
+@media (max-width: 620px) {
+    .record {
+        border-radius: 16px;
+    }
+
+    .record-head {
+        padding: 15px 14px 11px;
+    }
+
+    .record-name {
+        font-size: 14px;
+    }
+
+    .record-meta {
+        margin-left: 40px;
+        max-width: calc(100% - 40px);
+    }
+
+    .record-grid {
+        padding: 0 14px 12px;
+        gap: 7px;
+    }
+
+    .record-grid div {
+        min-height: 54px;
+        padding: 9px;
+    }
+
+    .record-actions {
+        padding: 10px 14px 13px;
+        gap: 6px;
+    }
+
+    .record-actions .btn {
+        min-height: 36px;
+        font-size: 10px;
+    }
+
+    #statusModal .modal-card,
+    #detailsModal .modal-card {
+        width: 100%;
+    }
+
+    .modal-actions {
+        margin-left: -13px;
+        margin-right: -13px;
+        margin-bottom: -13px;
+        padding-left: 13px;
+        padding-right: 13px;
+    }
+}
+
+/* ---------- VERY SMALL PHONES ---------- */
+@media (max-width: 390px) {
+    .record-name::before {
+        width: 28px;
+        height: 28px;
+        flex-basis: 28px;
+    }
+
+    .record-meta {
+        margin-left: 37px;
+    }
+
+    .record-grid {
+        padding-left: 11px;
+        padding-right: 11px;
+    }
+
+    .record-actions {
+        padding-left: 11px;
+        padding-right: 11px;
+    }
+
+    .modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    .modal-actions .btn {
+        width: 100%;
+    }
+}
