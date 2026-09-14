@@ -66,6 +66,20 @@ function value(id) {
     return String($(id)?.value || "").trim();
 }
 
+function selectedDefects() {
+    return Array.from(document.querySelectorAll('#defectList input[type="checkbox"]:checked')).map(input => input.value);
+}
+
+function setSelectedDefects(defects) {
+    const selected = new Set(Array.isArray(defects) ? defects : []);
+    document.querySelectorAll('#defectList input[type="checkbox"]').forEach(input => { input.checked = selected.has(input.value); });
+}
+
+function cleanAadhaar(value) {
+    return String(value || "").replace(/\D/g, "").slice(0, 12);
+}
+
+
 function show(id) {
     const el = $(id);
     if (!el) return;
@@ -302,8 +316,13 @@ function render() {
             record.name,
             record.instituteName,
             record.defect,
+            ...(record.defects || []),
             record.fatherName,
             record.motherName,
+            record.fatherAadhaar,
+            record.motherAadhaar,
+            record.villageName,
+            record.referralType,
             record.hospitalName,
             record.birthCertificateNo,
             record.mobile1,
@@ -417,7 +436,7 @@ function renderRecord(record) {
 
                 <div>
                     <strong>DEFECT / PROBLEM</strong>
-                    ${esc(record.defect || "-")}
+                    ${esc((record.defects && record.defects.length) ? record.defects.join(", ") : (record.defect || "-"))}
                 </div>
 
                 <div>
@@ -434,8 +453,18 @@ function renderRecord(record) {
                 </div>
 
                 <div>
+                    <strong>REFER TYPE</strong>
+                    ${esc(record.referralType || "-")}
+                </div>
+
+                <div>
                     <strong>HOSPITAL</strong>
                     ${esc(record.hospitalName || "-")}
+                </div>
+
+                <div>
+                    <strong>VILLAGE</strong>
+                    ${esc(record.villageName || "-")}
                 </div>
 
             </div>
@@ -512,6 +541,11 @@ function resetReferralForm() {
 
     $("className").value = "";
     $("awcWorkerNumber").value = "";
+    $("fatherAadhaar").value = "";
+    $("motherAadhaar").value = "";
+    $("villageName").value = "";
+    setSelectedDefects([]);
+    updateMobile3Label("");
 
     editingReferralId = null;
 
@@ -664,8 +698,11 @@ $("referralForm")?.addEventListener(
         const childName =
             value("childName");
 
-        const defect =
-            value("defect");
+        const defects = selectedDefects();
+        const defect = defects.join(", ");
+        const fatherAadhaar = cleanAadhaar($("fatherAadhaar").value);
+        const motherAadhaar = cleanAadhaar($("motherAadhaar").value);
+        const villageName = value("villageName");
 
         const instituteName =
             value("instituteName");
@@ -688,9 +725,21 @@ $("referralForm")?.addEventListener(
             return;
         }
 
-        if (!defect) {
-            alert("Please enter defect / health problem.");
-            $("defect").focus();
+        if (!defects.length) {
+            alert("Please select at least one defect / health condition.");
+            document.querySelector('#defectList input')?.focus();
+            return;
+        }
+
+        if (fatherAadhaar && fatherAadhaar.length !== 12) {
+            alert("Father Aadhaar number must be 12 digits.");
+            $("fatherAadhaar").focus();
+            return;
+        }
+
+        if (motherAadhaar && motherAadhaar.length !== 12) {
+            alert("Mother Aadhaar number must be 12 digits.");
+            $("motherAadhaar").focus();
             return;
         }
 
@@ -730,6 +779,12 @@ $("referralForm")?.addEventListener(
 
             motherName:
                 value("motherName"),
+
+            fatherAadhaar,
+            motherAadhaar,
+            villageName,
+            defects,
+            defect,
 
             weight:
                 value("weight"),
@@ -830,6 +885,9 @@ $("referralForm")?.addEventListener(
                             "",
 
                         completedDate:
+                            "",
+
+                        referralType:
                             "",
 
                         hospitalName:
@@ -1041,10 +1099,16 @@ function toggleTreatment() {
     const status =
         $("newStatus")?.value || "";
 
-    const needsTreatment = [
-        "Referred",
-        "Treatment Started"
-    ].includes(status);
+    const needsReferral = ["Referred", "Treatment Started", "Completed"].includes(status);
+    const needsTreatment = ["Referred", "Treatment Started"].includes(status);
+
+    if ($("referralTypeWrap")) {
+        $("referralTypeWrap").hidden = !needsReferral;
+    }
+    if ($("referralType")) {
+        $("referralType").required = status === "Referred";
+    }
+    updateHospitalVisibility();
 
     if ($("treatmentFields")) {
         $("treatmentFields").hidden =
@@ -1093,8 +1157,12 @@ $("statusForm")?.addEventListener(
         const selectedDate =
             $("statusDate")?.value || "";
 
+        const referralType = value("referralType");
+
         const hospitalName =
-            value("hospitalName");
+            value("hospitalSelect") === "Other"
+                ? value("otherHospitalName")
+                : (value("hospitalSelect") || value("hospitalName"));
 
         const expenditure =
             value("estimatedExpenditure");
@@ -1124,11 +1192,22 @@ $("statusForm")?.addEventListener(
 
 
         // ----------------------------------------------------
+        // REFER TYPE VALIDATION
+        // ----------------------------------------------------
+
+        if (status === "Referred" && !referralType) {
+            alert("Please select Refer Type.");
+            $("referralType").focus();
+            return;
+        }
+
+        // ----------------------------------------------------
         // HOSPITAL VALIDATION
         // ----------------------------------------------------
 
         if (
             needsTreatment &&
+            referralType === "Refer to Private Hospital" &&
             !hospitalName
         ) {
 
@@ -1244,13 +1323,15 @@ $("statusForm")?.addEventListener(
                 Previous hospital/expenditure remain saved.
             */
 
-            if (needsTreatment) {
+            if (referralType) {
+                updateData.referralType = referralType;
+            }
 
-                updateData.hospitalName =
-                    hospitalName;
-
-                updateData.estimatedTreatmentExpenditure =
-                    expenditure;
+            if (needsTreatment && referralType === "Refer to Private Hospital") {
+                updateData.hospitalName = hospitalName;
+                updateData.estimatedTreatmentExpenditure = expenditure;
+            } else if (referralType === "Refer to DEIC") {
+                updateData.hospitalName = "DEIC";
             }
 
 
@@ -1449,12 +1530,11 @@ window.viewDetails = function (id) {
 
                 <div class="details-row">
                     <span>Mother Name</span>
-                    <strong>
-                        ${esc(
-                            record.motherName || "-"
-                        )}
-                    </strong>
+                    <strong>${esc(record.motherName || "-")}</strong>
                 </div>
+
+                <div class="details-row"><span>Father Aadhaar</span><strong>${esc(record.fatherAadhaar || "-")}</strong></div>
+                <div class="details-row"><span>Mother Aadhaar</span><strong>${esc(record.motherAadhaar || "-")}</strong></div>
 
             </div>
 
@@ -1473,7 +1553,7 @@ window.viewDetails = function (id) {
                     <span>Defect / Health Problem</span>
                     <strong>
                         ${esc(
-                            record.defect || "-"
+                            (record.defects && record.defects.length) ? record.defects.join(", ") : (record.defect || "-")
                         )}
                     </strong>
                 </div>
@@ -1515,6 +1595,8 @@ window.viewDetails = function (id) {
                         ${esc(type)}
                     </strong>
                 </div>
+
+                <div class="details-row"><span>Village Name</span><strong>${esc(record.villageName || "-")}</strong></div>
 
                 <div class="details-row">
                     <span>Institute Name</span>
@@ -1575,7 +1657,7 @@ window.viewDetails = function (id) {
                 </div>
 
                 <div class="details-row">
-                    <span>Mobile 3</span>
+                    <span>AWC / School Principal Mobile</span>
                     <strong>
                         ${esc(
                             record.mobile3 || "-"
@@ -1604,6 +1686,8 @@ window.viewDetails = function (id) {
                         )}
                     </strong>
                 </div>
+
+                <div class="details-row"><span>Refer Type</span><strong>${esc(record.referralType || "-")}</strong></div>
 
                 <div class="details-row">
                     <span>Hospital Name</span>
@@ -1748,6 +1832,40 @@ $("confirmDelete")?.addEventListener(
 
 
 // ============================================================
+function updateMobile3Label(type) {
+    const label = $("mobile3Label");
+    if (!label) return;
+    label.textContent = type === "School"
+        ? "School Principal Mobile Number"
+        : type === "AWC"
+            ? "AWC Worker Mobile Number"
+            : "AWC / School Principal Mobile Number";
+}
+
+function setHospitalSelector(hospitalName) {
+    const select = $("hospitalSelect");
+    if (!select) return;
+    const known = ["Arvindo Hospital", "Bhandari Hospital", "Medanta Hospital"];
+    if (known.includes(hospitalName)) {
+        select.value = hospitalName;
+        $("otherHospitalName").value = "";
+    } else if (hospitalName && hospitalName !== "DEIC") {
+        select.value = "Other";
+        $("otherHospitalName").value = hospitalName;
+    } else {
+        select.value = "";
+        $("otherHospitalName").value = "";
+    }
+    updateHospitalVisibility();
+}
+
+function updateHospitalVisibility() {
+    const isPrivate = $("referralType")?.value === "Refer to Private Hospital";
+    if ($("hospitalSelectWrap")) $("hospitalSelectWrap").hidden = !isPrivate;
+    if ($("otherHospitalWrap")) $("otherHospitalWrap").hidden = !isPrivate || $("hospitalSelect")?.value !== "Other";
+    if ($("hospitalName")) $("hospitalName").required = isPrivate;
+}
+
 // INSTITUTE TYPE
 // ============================================================
 
@@ -1757,6 +1875,8 @@ $("instituteType")?.addEventListener(
 
         const type =
             event.target.value;
+
+        updateMobile3Label(type);
 
         $("classWrap").hidden =
             type !== "School";
@@ -1878,6 +1998,31 @@ $("newStatus")?.addEventListener(
     }
 );
 
+$("referralType")?.addEventListener("change", () => {
+    if ($("referralType").value !== "Refer to Private Hospital") {
+        $("hospitalSelect").value = "";
+        $("otherHospitalName").value = "";
+        $("hospitalName").value = "";
+    }
+    updateHospitalVisibility();
+});
+
+$("hospitalSelect")?.addEventListener("change", () => {
+    const selected = $("hospitalSelect").value;
+    if (selected === "Other") {
+        $("hospitalName").value = value("otherHospitalName");
+        $("otherHospitalName").focus();
+    } else {
+        $("hospitalName").value = selected;
+        $("otherHospitalName").value = "";
+    }
+    updateHospitalVisibility();
+});
+
+$("otherHospitalName")?.addEventListener("input", () => {
+    if ($("hospitalSelect").value === "Other") $("hospitalName").value = value("otherHospitalName");
+});
+
 
 // ============================================================
 // SEARCH
@@ -1916,17 +2061,18 @@ $("typeFilter")?.addEventListener(
 [
     "mobile1",
     "mobile2",
-    "mobile3"
+    "mobile3",
+    "fatherAadhaar",
+    "motherAadhaar"
 ].forEach(id => {
 
     $(id)?.addEventListener(
         "input",
         function () {
 
-            this.value =
-                cleanMobile(
-                    this.value
-                );
+            this.value = id.includes("Aadhaar")
+                ? cleanAadhaar(this.value)
+                : cleanMobile(this.value);
         }
     );
 });
