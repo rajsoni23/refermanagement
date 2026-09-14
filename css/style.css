@@ -1809,16 +1809,76 @@ textarea::placeholder {
 }
 
 
-/* RBSK health condition selector */
-.form-field-block{display:flex;flex-direction:column;gap:8px}.form-label{font-weight:700;font-size:13px}.condition-list{display:grid;grid-template-columns:1fr 1fr;gap:7px;border:1px solid #dfe4ec;border-radius:12px;background:#f8fafc;padding:8px}.condition-list label{display:flex;align-items:flex-start;gap:8px;background:#fff;border:1px solid #edf0f4;border-radius:9px;padding:9px;cursor:pointer;font-size:12px}.condition-list input{width:17px;height:17px;accent-color:#2563eb;margin:0;flex:none}.condition-list b{color:#2563eb;margin-right:4px}.condition-list label:has(input:checked){border-color:#93c5fd;background:#eff6ff}
-@media(max-width:650px){.condition-list{grid-template-columns:1fr}}
+/* =========================================================
+   RBSK HEALTH CONDITION SELECTOR
+========================================================= */
+
+.form-field-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    font-weight: 700;
+    font-size: 13px;
+}
+
+.condition-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 7px;
+    border: 1px solid #dfe4ec;
+    border-radius: 12px;
+    background: #f8fafc;
+    padding: 8px;
+}
+
+.condition-list label {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #edf0f4;
+    border-radius: 9px;
+    padding: 9px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.condition-list input {
+    width: 17px;
+    height: 17px;
+    accent-color: #2563eb;
+    margin: 0;
+    flex: none;
+}
+
+.condition-list b {
+    color: #2563eb;
+    margin-right: 4px;
+}
+
+.condition-list label:has(input:checked) {
+    border-color: #93c5fd;
+    background: #eff6ff;
+}
+
+@media(max-width:650px) {
+    .condition-list {
+        grid-template-columns: 1fr;
+    }
+}
+
 
 /* =========================================================
    SHREE RBSK — PREMIUM UI ENHANCEMENT
    Student cards + Status workflow + Modal polish
-   ========================================================= */
+========================================================= */
+
 
 /* ---------- PREMIUM STUDENT CARD ---------- */
+
 .record {
     position: relative;
     overflow: hidden;
@@ -1896,7 +1956,9 @@ textarea::placeholder {
     box-shadow: 0 2px 7px rgba(25,42,70,.06);
 }
 
+
 /* ---------- CARD INFORMATION AREA ---------- */
+
 .record-grid {
     margin: 0;
     padding: 0 18px 14px;
@@ -1927,7 +1989,9 @@ textarea::placeholder {
     color: #26334b;
 }
 
+
 /* ---------- CARD ACTION BAR ---------- */
+
 .record-actions {
     margin: 0;
     padding: 12px 18px 16px;
@@ -1956,7 +2020,9 @@ textarea::placeholder {
     border-color: #e7e1ff;
 }
 
+
 /* ---------- PREMIUM STATUS BADGES ---------- */
+
 .badge {
     min-height: 29px;
     padding: 6px 11px;
@@ -1985,7 +2051,9 @@ textarea::placeholder {
     border-color: #d1efdf;
 }
 
+
 /* ---------- STATUS UPDATE MODAL ---------- */
+
 #statusModal .modal-card {
     width: min(500px, 100%);
 }
@@ -2042,16 +2110,31 @@ textarea::placeholder {
 }
 
 @keyframes statusFieldIn {
-    from { opacity: 0; transform: translateY(-4px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 #treatmentFields {
     margin-top: 12px;
     padding: 15px;
     background:
-        radial-gradient(circle at 100% 0%, rgba(117,87,217,.06), transparent 35%),
-        linear-gradient(135deg, #fafbff, #f5f8fc);
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(117,87,217,.06),
+            transparent 35%
+        ),
+        linear-gradient(
+            135deg,
+            #fafbff,
+            #f5f8fc
+        );
     border: 1px solid #dfe6f1;
     border-radius: 14px;
 }
@@ -2064,13 +2147,28 @@ textarea::placeholder {
     min-height: 44px;
 }
 
+
 /* Status flow visual cue */
-#newStatus option[value="Pending"] { color: #e88925; }
-#newStatus option[value="Referred"] { color: #356df3; }
-#newStatus option[value="Treatment Started"] { color: #7557d9; }
-#newStatus option[value="Completed"] { color: #15946a; }
+
+#newStatus option[value="Pending"] {
+    color: #e88925;
+}
+
+#newStatus option[value="Referred"] {
+    color: #356df3;
+}
+
+#newStatus option[value="Treatment Started"] {
+    color: #7557d9;
+}
+
+#newStatus option[value="Completed"] {
+    color: #15946a;
+}
+
 
 /* ---------- DETAILS MODAL PREMIUM ---------- */
+
 #detailsModal .modal-card {
     width: min(820px, 100%);
 }
@@ -2096,21 +2194,29 @@ textarea::placeholder {
     color: #25334c;
 }
 
+
 /* ---------- PREMIUM DELETE MODAL ---------- */
+
 #deleteModal .modal-card {
     border-top: 4px solid #d9485f;
 }
 
+
 /* ---------- BETTER MODAL FOOTERS ---------- */
+
 .modal-actions {
     position: sticky;
     bottom: -21px;
     z-index: 2;
+
     margin-left: -21px;
     margin-right: -21px;
     margin-bottom: -21px;
+
     padding: 13px 21px 16px;
+
     background: rgba(255,255,255,.94);
+
     backdrop-filter: blur(8px);
 }
 
@@ -2118,7 +2224,9 @@ textarea::placeholder {
     min-width: 110px;
 }
 
+
 /* ---------- COMPACT DEFECT SELECTOR ---------- */
+
 #defectList,
 .condition-list {
     max-height: 255px;
@@ -2138,8 +2246,11 @@ textarea::placeholder {
     height: 15px;
 }
 
+
 /* ---------- MOBILE CARD ---------- */
+
 @media (max-width: 620px) {
+
     .record {
         border-radius: 16px;
     }
@@ -2191,8 +2302,11 @@ textarea::placeholder {
     }
 }
 
+
 /* ---------- VERY SMALL PHONES ---------- */
+
 @media (max-width: 390px) {
+
     .record-name::before {
         width: 28px;
         height: 28px;
@@ -2218,6 +2332,473 @@ textarea::placeholder {
     }
 
     .modal-actions .btn {
+        width: 100%;
+    }
+}
+
+
+/* =========================================================
+   SHREE RBSK — FINAL UI FIX
+   Fixes:
+   1. Broken Update Status layout
+   2. Defect text visibility
+   3. Better status workflow presentation
+   4. Premium student cards
+========================================================= */
+
+
+/* ---------- STATUS FORM: FORCE CLEAN VERTICAL FLOW ---------- */
+
+#statusForm {
+    display: block !important;
+    width: 100%;
+}
+
+#statusForm > label {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+
+    width: 100%;
+
+    padding: 0 !important;
+    margin: 0 0 12px;
+
+    background: transparent !important;
+    border: 0 !important;
+}
+
+#statusForm > label > span,
+#statusForm > label > .form-label {
+    display: block;
+
+    margin-bottom: 7px;
+
+    color: #34415a;
+
+    font-size: 11px;
+    font-weight: 800;
+}
+
+#statusForm #newStatus,
+#statusForm #referType,
+#statusForm #privateHospital,
+#statusForm #otherHospitalName {
+    width: 100%;
+
+    min-height: 44px;
+
+    display: block;
+}
+
+
+/* Refer Type must never sit beside Status */
+
+#referTypeWrap {
+    display: block !important;
+
+    width: 100%;
+
+    margin: 2px 0 12px !important;
+
+    padding: 13px !important;
+}
+
+#referTypeWrap[hidden],
+#privateHospitalWrap[hidden],
+#otherHospitalWrap[hidden],
+#treatmentFields[hidden] {
+    display: none !important;
+}
+
+#privateHospitalWrap,
+#otherHospitalWrap {
+    width: 100%;
+
+    margin-top: 10px;
+}
+
+#privateHospitalWrap label,
+#otherHospitalWrap label {
+    display: grid;
+
+    gap: 7px;
+
+    width: 100%;
+
+    color: #34415a;
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+
+/* ---------- TREATMENT SECTION ---------- */
+
+#treatmentFields {
+    display: grid !important;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 12px;
+
+    width: 100%;
+
+    margin-top: 12px !important;
+}
+
+#treatmentFields[hidden] {
+    display: none !important;
+}
+
+#treatmentFields label {
+    display: grid;
+
+    gap: 7px;
+
+    min-width: 0;
+}
+
+#treatmentFields label:first-child {
+    grid-column: 1 / -1;
+}
+
+#treatmentFields input {
+    width: 100%;
+}
+
+
+/* ---------- STATUS MODAL FOOTER ---------- */
+
+#statusModal .modal-actions {
+    display: flex;
+
+    justify-content: flex-end;
+
+    gap: 9px;
+}
+
+#statusModal .modal-actions .btn {
+    min-width: 112px;
+}
+
+
+/* ---------- DEFECT / HEALTH CONDITION: TEXT MUST SHOW ---------- */
+
+#defectList,
+.condition-list {
+    display: grid !important;
+
+    grid-template-columns:
+        repeat(2, minmax(0, 1fr)) !important;
+
+    gap: 7px !important;
+
+    max-height: 255px;
+
+    overflow-y: auto;
+
+    padding: 7px !important;
+
+    background: #f8fafc;
+
+    border: 1px solid #dfe5ee;
+
+    border-radius: 12px;
+}
+
+
+/* Every option is a real visible row */
+
+#defectList label,
+.condition-list label {
+    display: flex !important;
+
+    align-items: flex-start !important;
+
+    justify-content: flex-start !important;
+
+    gap: 8px !important;
+
+    width: 100%;
+
+    min-width: 0;
+
+    min-height: 40px !important;
+
+    padding: 8px 9px !important;
+
+    margin: 0 !important;
+
+    color: #26344d !important;
+
+    background: #ffffff !important;
+
+    border: 1px solid #e4eaf2 !important;
+
+    border-radius: 9px !important;
+
+    font-size: 11px !important;
+
+    font-weight: 600 !important;
+
+    line-height: 1.3 !important;
+
+    text-align: left !important;
+
+    cursor: pointer;
+
+    overflow: hidden;
+}
+
+#defectList label:hover,
+.condition-list label:hover {
+    border-color: #cbd9f2 !important;
+
+    background: #fbfdff !important;
+}
+
+#defectList label:has(input:checked),
+.condition-list label:has(input:checked) {
+    border-color: #8fb5ff !important;
+
+    background: #eef4ff !important;
+
+    color: #214da8 !important;
+
+    box-shadow:
+        0 2px 7px rgba(53,109,243,.07);
+}
+
+#defectList input[type="checkbox"],
+.condition-list input[type="checkbox"] {
+    display: block !important;
+
+    width: 16px !important;
+    height: 16px !important;
+
+    min-width: 16px !important;
+    max-width: 16px !important;
+
+    margin: 1px 0 0 !important;
+
+    padding: 0 !important;
+
+    flex: 0 0 16px !important;
+
+    accent-color: #356df3;
+}
+
+
+/* Text wrappers inside options */
+
+#defectList label span,
+#defectList label b,
+#defectList label strong,
+.condition-list label span,
+.condition-list label b,
+.condition-list label strong {
+    display: inline !important;
+
+    width: auto !important;
+
+    max-width: 100%;
+
+    color: inherit !important;
+
+    font-size: inherit !important;
+
+    line-height: inherit !important;
+
+    white-space: normal !important;
+}
+
+
+/* ---------- OTHER HEALTH CONDITION ---------- */
+
+#otherDefectBox {
+    width: 100%;
+
+    margin-top: 9px;
+}
+
+#otherDefectBox label {
+    display: grid;
+
+    gap: 7px;
+
+    color: #34415a;
+
+    font-size: 11px;
+    font-weight: 750;
+}
+
+#otherDefect {
+    width: 100%;
+
+    min-height: 42px;
+
+    padding: 10px 12px;
+
+    border: 1px solid #d7deea;
+
+    border-radius: 10px;
+
+    background: #fff;
+}
+
+
+/* ---------- STUDENT CARD: MORE PREMIUM / LESS BULKY ---------- */
+
+.record {
+    border-radius: 17px !important;
+
+    background:
+        linear-gradient(
+            180deg,
+            #ffffff 0%,
+            #fbfcff 100%
+        ) !important;
+}
+
+.record-head {
+    padding: 16px 17px 12px !important;
+}
+
+.record-name {
+    font-size: 15px !important;
+}
+
+.record-name::before {
+    content: "👤" !important;
+
+    width: 32px !important;
+    height: 32px !important;
+
+    flex-basis: 32px !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #edf3ff,
+            #e9edff
+        ) !important;
+
+    border: 1px solid #dbe5fb !important;
+
+    font-size: 14px !important;
+}
+
+.record-meta {
+    margin-top: 5px !important;
+}
+
+.record-grid {
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr)) !important;
+
+    gap: 8px !important;
+
+    padding: 0 17px 13px !important;
+}
+
+.record-grid div {
+    min-height: 56px !important;
+
+    padding: 9px 10px !important;
+
+    border-radius: 10px !important;
+}
+
+.record-actions {
+    padding: 11px 17px 14px !important;
+}
+
+
+/* Make Update Status the prominent action */
+
+.record-actions .btn:nth-child(3) {
+    background:
+        linear-gradient(
+            135deg,
+            #f1edff,
+            #e9e3ff
+        ) !important;
+
+    border-color: #ddd4ff !important;
+
+    color: #6848c8 !important;
+
+    font-weight: 800;
+}
+
+
+/* ---------- DETAILS: STATUS TIMELINE LOOK ---------- */
+
+#detailsModal .details-content > .details-section:first-child {
+    border: 1px solid #dce6f7 !important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8faff,
+            #f2f6fc
+        ) !important;
+
+    box-shadow:
+        0 5px 18px rgba(53,109,243,.05);
+}
+
+
+/* ---------- MOBILE ---------- */
+
+@media (max-width: 650px) {
+
+    #defectList,
+    .condition-list {
+        grid-template-columns: 1fr !important;
+
+        max-height: 285px;
+    }
+
+    #treatmentFields {
+        grid-template-columns: 1fr !important;
+    }
+
+    #treatmentFields label:first-child {
+        grid-column: auto;
+    }
+
+    #statusModal .modal-card {
+        padding: 16px !important;
+    }
+
+    #statusModal .modal-actions {
+        margin-left: -16px;
+        margin-right: -16px;
+        margin-bottom: -16px;
+
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .record-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+
+
+@media (max-width: 390px) {
+
+    .record-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    #statusModal .modal-actions {
+        flex-direction: column-reverse;
+    }
+
+    #statusModal .modal-actions .btn {
         width: 100%;
     }
 }
