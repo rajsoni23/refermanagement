@@ -1,4 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.2.1/firebase-app.js";
+
 import {
     getAuth,
     onAuthStateChanged,
@@ -22,12 +23,13 @@ import { firebaseConfig } from "./firebase-config.js";
 
 
 // =====================================================
-// FIREBASE
+// FIREBASE INITIALIZATION
 // =====================================================
 
 const app = initializeApp(firebaseConfig);
 
 const auth = getAuth(app);
+
 const db = getFirestore(app);
 
 
@@ -38,92 +40,250 @@ const db = getFirestore(app);
 let currentUser = null;
 
 let currentReferralId = null;
+
 let currentDeleteId = null;
+
 let editingReferralId = null;
 
 let records = [];
 
 
 // =====================================================
-// DOM HELPERS
+// HELPERS
 // =====================================================
 
 const $ = (id) => document.getElementById(id);
 
-function value(id) {
-    const el = $(id);
-    return el ? el.value.trim() : "";
+
+const esc = (value) => {
+
+    return String(value ?? "").replace(
+        /[&<>"']/g,
+        character => ({
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            '"': "&quot;",
+            "'": "&#039;"
+        }[character])
+    );
+
+};
+
+
+const value = (id) => {
+
+    return String($(id)?.value || "").trim();
+
+};
+
+
+const cleanMobile = (value) => {
+
+    return String(value || "")
+        .replace(/\D/g, "")
+        .slice(0, 10);
+
+};
+
+
+const cleanAadhaar = (value) => {
+
+    return String(value || "")
+        .replace(/\D/g, "")
+        .slice(0, 12);
+
+};
+
+
+// =====================================================
+// MODALS
+// =====================================================
+
+function show(id) {
+
+    const element = $(id);
+
+    if (!element) return;
+
+    element.classList.add("show");
+
+    element.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+
 }
 
-function setValue(id, val) {
-    const el = $(id);
-    if (el) {
-        el.value = val ?? "";
+
+function hide(id) {
+
+    const element = $(id);
+
+    if (!element) return;
+
+    element.classList.remove("show");
+
+    element.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+
+}
+
+
+// =====================================================
+// DATE HELPERS
+// =====================================================
+
+function today() {
+
+    const date = new Date();
+
+    return `${date.getFullYear()}-${String(
+        date.getMonth() + 1
+    ).padStart(2, "0")}-${String(
+        date.getDate()
+    ).padStart(2, "0")}`;
+
+}
+
+
+function formatDate(value) {
+
+    if (!value) return "-";
+
+    const stringValue = String(value);
+
+    if (
+        /^\d{4}-\d{2}-\d{2}$/.test(
+            stringValue
+        )
+    ) {
+
+        const [
+            year,
+            month,
+            day
+        ] = stringValue.split("-");
+
+        return `${day}/${month}/${year}`;
+
     }
+
+    return stringValue;
+
 }
 
-function checked(id) {
-    const el = $(id);
-    return el ? el.checked : false;
+
+// =====================================================
+// FIREBASE ERROR
+// =====================================================
+
+function firebaseErrorMessage(error) {
+
+    console.error(error);
+
+    if (
+        error?.code ===
+        "permission-denied"
+    ) {
+
+        return "Permission denied. Please check Firebase Firestore Rules.";
+
+    }
+
+    return (
+        error?.message ||
+        "Something went wrong. Please try again."
+    );
+
 }
 
 
 // =====================================================
-// DEFECT OPTIONS
+// FIRESTORE REFERENCES
 // =====================================================
 
-const DEFECT_IDS = [
-    "defect1",
-    "defect2",
-    "defect3",
-    "defect4",
-    "defect5",
-    "defect6",
-    "defect7",
-    "defect8",
-    "defect9",
-    "defect47",
-    "defect48",
-    "defect50",
-    "otherDefectCheckbox"
-];
+function referralsCollection() {
+
+    if (!currentUser) {
+
+        throw new Error(
+            "User is not authenticated."
+        );
+
+    }
+
+    return collection(
+        db,
+        "users",
+        currentUser.uid,
+        "referrals"
+    );
+
+}
+
+
+function referralDocument(id) {
+
+    if (!currentUser) {
+
+        throw new Error(
+            "User is not authenticated."
+        );
+
+    }
+
+    return doc(
+        db,
+        "users",
+        currentUser.uid,
+        "referrals",
+        id
+    );
+
+}
 
 
 // =====================================================
-// SELECTED DEFECTS
+// DEFECT SELECTION
 // =====================================================
 
 function selectedDefects() {
 
-    const defects = [];
+    const selected = [
+        ...document.querySelectorAll(
+            '#defectList input[type="checkbox"]:checked'
+        )
+    ].map(
+        checkbox => checkbox.value
+    );
 
-    DEFECT_IDS.forEach(id => {
+    const otherCheckbox =
+        $("otherDefectCheckbox");
 
-        const el = $(id);
+    const otherInput =
+        $("otherDefect");
 
-        if (el && el.checked) {
+    if (
+        otherCheckbox?.checked &&
+        otherInput?.value.trim()
+    ) {
 
-            if (id === "otherDefectCheckbox") {
+        return [
+            ...selected.filter(
+                item =>
+                    item !==
+                    "Other Health Condition"
+            ),
+            `Other Health Condition - ${otherInput.value.trim()}`
+        ];
 
-                const custom = value("otherDefect");
+    }
 
-                if (custom) {
-                    defects.push(
-                        `Other Health Condition - ${custom}`
-                    );
-                } else {
-                    defects.push("Other Health Condition");
-                }
+    return selected;
 
-            } else {
-
-                defects.push(el.value || el.dataset.value || "");
-
-            }
-        }
-    });
-
-    return defects.filter(Boolean);
 }
 
 
@@ -131,257 +291,578 @@ function selectedDefects() {
 // SET DEFECTS
 // =====================================================
 
-function setSelectedDefects(defects = []) {
+function setSelectedDefects(defects) {
 
-    DEFECT_IDS.forEach(id => {
+    document
+        .querySelectorAll(
+            '#defectList input[type="checkbox"]'
+        )
+        .forEach(
+            checkbox => {
+                checkbox.checked = false;
+            }
+        );
 
-        const el = $(id);
 
-        if (el) {
-            el.checked = false;
-        }
+    if ($("otherDefect")) {
 
-    });
+        $("otherDefect").value = "";
 
-    setValue("otherDefect", "");
-
-    if (!Array.isArray(defects)) {
-        updateOtherDefectVisibility();
-        return;
     }
 
-    defects.forEach(defect => {
 
-        const text = String(defect);
+    (
+        Array.isArray(defects)
+            ? defects
+            : []
+    ).forEach(defect => {
 
-        let matched = false;
+        const text =
+            String(defect || "");
 
-        DEFECT_IDS.forEach(id => {
 
-            if (id === "otherDefectCheckbox") return;
+        if (
+            text.startsWith(
+                "Other Health Condition - "
+            )
+        ) {
 
-            const el = $(id);
+            if ($("otherDefectCheckbox")) {
 
-            if (!el) return;
-
-            const candidate =
-                el.value ||
-                el.dataset.value ||
-                "";
-
-            if (candidate === text) {
-
-                el.checked = true;
-                matched = true;
-            }
-        });
-
-        if (!matched && text.startsWith("Other Health Condition")) {
-
-            const other = $("otherDefectCheckbox");
-
-            if (other) {
-                other.checked = true;
-            }
-
-            const prefix = "Other Health Condition - ";
-
-            if (text.startsWith(prefix)) {
-
-                setValue(
-                    "otherDefect",
-                    text.substring(prefix.length)
-                );
+                $("otherDefectCheckbox").checked =
+                    true;
 
             }
+
+            if ($("otherDefect")) {
+
+                $("otherDefect").value =
+                    text.replace(
+                        "Other Health Condition - ",
+                        ""
+                    );
+
+            }
+
+            return;
+        }
+
+
+        const checkbox = [
+            ...document.querySelectorAll(
+                '#defectList input[type="checkbox"]'
+            )
+        ].find(
+            item =>
+                item.value === text
+        );
+
+
+        if (checkbox) {
+
+            checkbox.checked = true;
 
         }
 
     });
 
+
     updateOtherDefectVisibility();
+
 }
 
 
 // =====================================================
-// OTHER DEFECT VISIBILITY
+// OTHER DEFECT BOX
 // =====================================================
 
 function updateOtherDefectVisibility() {
 
-    const checkbox = $("otherDefectCheckbox");
-    const box = $("otherDefectBox");
+    const checkbox =
+        $("otherDefectCheckbox");
+
+    const box =
+        $("otherDefectBox");
 
     if (!box) return;
 
-    if (checkbox && checkbox.checked) {
+    const visible =
+        checkbox?.checked === true;
 
-        box.style.display = "block";
+    box.classList.toggle(
+        "hidden",
+        !visible
+    );
 
-    } else {
-
-        box.style.display = "none";
-        setValue("otherDefect", "");
-
-    }
-}
-
-
-// =====================================================
-// INSTITUTE TYPE
-// =====================================================
-
-function updateInstituteFields() {
-
-    const instituteType = value("instituteType");
-
-    const classGroup = $("classGroup");
-    const awcMobileGroup = $("awcMobileGroup");
-
-    if (classGroup) {
-
-        classGroup.style.display =
-            instituteType === "School"
-                ? "block"
-                : "none";
-    }
-
-    if (awcMobileGroup) {
-
-        awcMobileGroup.style.display =
-            instituteType === "AWC"
-                ? "block"
-                : "none";
-    }
-
-    const mobile3Label = $("mobile3Label");
-
-    if (mobile3Label) {
-
-        if (instituteType === "School") {
-
-            mobile3Label.textContent =
-                "School Principal Mobile Number";
-
-        } else if (instituteType === "AWC") {
-
-            mobile3Label.textContent =
-                "AWC Worker Mobile Number";
-
-        } else {
-
-            mobile3Label.textContent =
-                "Mobile 3";
-        }
-    }
-}
-
-
-// =====================================================
-// STATUS HELPERS
-// =====================================================
-
-function updateStatusFields() {
-
-    const status = value("referralStatus");
-
-    const treatmentSection = $("treatmentSection");
-
-    if (!treatmentSection) return;
 
     if (
-        status === "Referred" ||
-        status === "Treatment Started" ||
-        status === "Completed"
+        !visible &&
+        $("otherDefect")
     ) {
 
-        treatmentSection.style.display = "block";
+        $("otherDefect").value = "";
 
-    } else {
-
-        treatmentSection.style.display = "none";
     }
 
-    toggleTreatment();
 }
 
 
 // =====================================================
-// TREATMENT / REFERRAL FIELDS
+// LOAD RECORDS
 // =====================================================
 
-function toggleTreatment() {
+async function loadRecords() {
 
-    const status = value("statusModalStatus");
+    if (!currentUser) return;
 
-    const treatmentFields =
-        $("treatmentFields");
 
-    if (!treatmentFields) return;
+    $("records").innerHTML =
+        '<div class="empty">Loading referral records...</div>';
 
-    if (
-        status === "Referred" ||
-        status === "Treatment Started" ||
-        status === "Completed"
-    ) {
 
-        treatmentFields.style.display = "block";
+    try {
 
-    } else {
-
-        treatmentFields.style.display = "none";
-    }
-
-    const referType =
-        value("statusModalReferType");
-
-    const privateHospital =
-        $("privateHospitalGroup");
-
-    const otherHospital =
-        $("otherHospitalGroup");
-
-    if (privateHospital) {
-
-        privateHospital.style.display =
-            referType === "Private Hospital"
-                ? "block"
-                : "none";
-    }
-
-    if (otherHospital) {
-
-        otherHospital.style.display =
-            (
-                referType === "Private Hospital" &&
-                value("statusModalPrivateHospital") === "Other"
+        const q = query(
+            referralsCollection(),
+            orderBy(
+                "createdAt",
+                "desc"
             )
-                ? "block"
-                : "none";
+        );
+
+
+        const snapshot =
+            await getDocs(q);
+
+
+        records =
+            snapshot.docs.map(
+                item => ({
+                    id: item.id,
+                    ...item.data()
+                })
+            );
+
+
+        render();
+
+
+    } catch (error) {
+
+        console.error(
+            "Load records error:",
+            error
+        );
+
+
+        records = [];
+
+
+        $("records").innerHTML =
+            `<div class="empty">
+                ${esc(
+                    firebaseErrorMessage(error)
+                )}
+            </div>`;
+
     }
+
 }
 
 
 // =====================================================
-// MODAL HELPERS
+// UPDATE STATS
 // =====================================================
 
-function openModal(id) {
+function updateStats() {
 
-    const modal = $(id);
+    const counts = {
 
-    if (modal) {
-        modal.classList.add("active");
-    }
+        Pending: 0,
+
+        Referred: 0,
+
+        "Treatment Started": 0,
+
+        Completed: 0
+
+    };
+
+
+    records.forEach(record => {
+
+        if (
+            counts[
+                record.status
+            ] !== undefined
+        ) {
+
+            counts[
+                record.status
+            ]++;
+
+        }
+
+    });
+
+
+    $("total").textContent =
+        records.length;
+
+
+    $("pending").textContent =
+        counts.Pending;
+
+
+    $("referred").textContent =
+        counts.Referred;
+
+
+    $("started").textContent =
+        counts["Treatment Started"];
+
+
+    $("completed").textContent =
+        counts.Completed;
+
 }
 
-function closeModal(id) {
 
-    const modal = $(id);
+// =====================================================
+// RENDER RECORDS
+// =====================================================
 
-    if (modal) {
-        modal.classList.remove("active");
-    }
+function render() {
+
+    const search =
+        value("search").toLowerCase();
+
+
+    const statusFilter =
+        $("statusFilter")?.value || "";
+
+
+    const typeFilter =
+        $("typeFilter")?.value || "";
+
+
+    const filtered =
+        records.filter(record => {
+
+            const searchable = [
+
+                record.childName,
+
+                record.instituteName,
+
+                record.defect,
+
+                record.defects?.join(" "),
+
+                record.fatherName,
+
+                record.motherName,
+
+                record.villageName,
+
+                record.hospitalName,
+
+                record.birthCertificateNo,
+
+                record.mobile1,
+
+                record.mobile2,
+
+                record.mobile3
+
+            ]
+                .filter(Boolean)
+                .join(" ")
+                .toLowerCase();
+
+
+            const searchMatch =
+                !search ||
+                searchable.includes(search);
+
+
+            const statusMatch =
+                !statusFilter ||
+                record.status ===
+                    statusFilter;
+
+
+            const typeMatch =
+                !typeFilter ||
+                (
+                    record.instituteType ||
+                    record.type ||
+                    ""
+                ) === typeFilter;
+
+
+            return (
+                searchMatch &&
+                statusMatch &&
+                typeMatch
+            );
+
+        });
+
+
+    $("records").innerHTML =
+        filtered.length
+            ? filtered
+                .map(renderRecord)
+                .join("")
+            : '<div class="empty">No referral records found.</div>';
+
+
+    updateStats();
+
+}
+
+
+// =====================================================
+// RENDER SINGLE RECORD
+// =====================================================
+
+function renderRecord(record) {
+
+    const status =
+        record.status ||
+        "Pending";
+
+
+    const badgeClass =
+        status === "Treatment Started"
+            ? "started"
+            : status.toLowerCase();
+
+
+    const name =
+        record.childName ||
+        record.name ||
+        "-";
+
+
+    const type =
+        record.instituteType ||
+        record.type ||
+        "-";
+
+
+    const defects =
+        record.defects?.length
+            ? record.defects.join(", ")
+            : record.defect ||
+              "-";
+
+
+    return `
+
+        <article class="record">
+
+            <div class="record-head">
+
+                <div>
+
+                    <div class="record-name">
+                        ${esc(name)}
+                    </div>
+
+                    <div class="record-meta">
+
+                        ${esc(type)}
+                        •
+                        ${esc(
+                            record.instituteName ||
+                            "-"
+                        )}
+
+                        • Registered:
+
+                        ${esc(
+                            formatDate(
+                                record.registeredDate ||
+                                record.referralDate
+                            )
+                        )}
+
+                    </div>
+
+                </div>
+
+
+                <span class="badge ${esc(
+                    badgeClass
+                )}">
+
+                    ${esc(status)}
+
+                </span>
+
+            </div>
+
+
+            <div class="record-grid">
+
+                <div>
+
+                    <strong>
+                        DEFECT / PROBLEM
+                    </strong>
+
+                    ${esc(defects)}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        SEX / DOB
+                    </strong>
+
+                    ${esc(
+                        record.sex || "-"
+                    )}
+
+                    /
+
+                    ${esc(
+                        formatDate(
+                            record.dob
+                        )
+                    )}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        WEIGHT / HEIGHT
+                    </strong>
+
+                    ${esc(
+                        record.weight || "-"
+                    )}
+
+                    kg /
+
+                    ${esc(
+                        record.height || "-"
+                    )}
+
+                    cm
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        VILLAGE
+                    </strong>
+
+                    ${esc(
+                        record.villageName ||
+                        "-"
+                    )}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        HOSPITAL
+                    </strong>
+
+                    ${esc(
+                        record.privateHospital ===
+                            "Other"
+                            ? (
+                                record.otherHospitalName ||
+                                "-"
+                            )
+                            : (
+                                record.privateHospital ||
+                                record.hospitalName ||
+                                "-"
+                            )
+                    )}
+
+                </div>
+
+
+                <div>
+
+                    <strong>
+                        STATUS
+                    </strong>
+
+                    ${esc(status)}
+
+                </div>
+
+            </div>
+
+
+            <div class="record-actions">
+
+                <button
+                    class="btn light small"
+                    onclick="window.viewDetails('${esc(record.id)}')"
+                >
+                    View Details
+                </button>
+
+
+                <button
+                    class="btn light small"
+                    onclick="window.editReferral('${esc(record.id)}')"
+                >
+                    Edit
+                </button>
+
+
+                <button
+                    class="btn light small"
+                    onclick="window.openStatus('${esc(record.id)}')"
+                >
+                    Update Status
+                </button>
+
+
+                <button
+                    class="btn danger small"
+                    onclick="window.openDelete('${esc(record.id)}')"
+                >
+                    Delete
+                </button>
+
+            </div>
+
+        </article>
+
+    `;
+
+}
+
+
+// =====================================================
+// FIND RECORD
+// =====================================================
+
+function findRecord(id) {
+
+    return records.find(
+        record =>
+            record.id === id
+    );
+
 }
 
 
@@ -391,254 +872,67 @@ function closeModal(id) {
 
 function resetReferralForm() {
 
-    const form = $("referralForm");
+    $("referralForm")?.reset();
 
-    if (form) {
-        form.reset();
+
+    if ($("classWrap")) {
+
+        $("classWrap").hidden =
+            true;
+
     }
+
+
+    if ($("awcWrap")) {
+
+        $("awcWrap").hidden =
+            true;
+
+    }
+
+
+    if ($("otherDefectBox")) {
+
+        $("otherDefectBox")
+            .classList
+            .add("hidden");
+
+    }
+
+
+    if ($("className")) {
+
+        $("className").value = "";
+
+    }
+
+
+    if ($("awcWorkerNumber")) {
+
+        $("awcWorkerNumber").value = "";
+
+    }
+
+
+    if ($("mobile3Label")) {
+
+        $("mobile3Label").textContent =
+            "Mobile 3";
+
+    }
+
 
     editingReferralId = null;
 
-    setSelectedDefects([]);
 
-    updateInstituteFields();
+    $("referralModalTitle").textContent =
+        "New Referral";
 
-    updateOtherDefectVisibility();
 
-    const title = $("referralModalTitle");
+    $("saveReferralButton").textContent =
+        "Save Referral";
 
-    if (title) {
-        title.textContent = "New Referral";
-    }
-
-    const submitBtn =
-        $("referralSubmitBtn");
-
-    if (submitBtn) {
-        submitBtn.textContent =
-            "Save Referral";
-    }
 }
-
-
-// =====================================================
-// OPEN NEW REFERRAL
-// =====================================================
-
-window.openNewReferral = function () {
-
-    resetReferralForm();
-
-    openModal("referralModal");
-};
-
-
-// =====================================================
-// CLOSE REFERRAL MODAL
-// =====================================================
-
-window.closeReferralModal = function () {
-
-    closeModal("referralModal");
-
-};
-
-
-// =====================================================
-// SAVE REFERRAL
-// =====================================================
-
-window.saveReferral = async function (event) {
-
-    if (event) {
-        event.preventDefault();
-    }
-
-    if (!currentUser) {
-
-        alert("Please login first.");
-        return;
-    }
-
-    const childName =
-        value("childName");
-
-    if (!childName) {
-
-        alert("Please enter Child Name.");
-        return;
-    }
-
-    const defects =
-        selectedDefects();
-
-    const instituteType =
-        value("instituteType");
-
-    const data = {
-
-        childName,
-
-        sex:
-            value("sex"),
-
-        dob:
-            value("dob"),
-
-        birthCertificateNumber:
-            value("birthCertificateNumber"),
-
-        fatherName:
-            value("fatherName"),
-
-        fatherAadhaar:
-            value("fatherAadhaar"),
-
-        motherName:
-            value("motherName"),
-
-        motherAadhaar:
-            value("motherAadhaar"),
-
-        villageName:
-            value("villageName"),
-
-        weight:
-            value("weight"),
-
-        height:
-            value("height"),
-
-        defects,
-
-        instituteType,
-
-        instituteName:
-            value("instituteName"),
-
-        className:
-            value("className"),
-
-        awcWorkerNumber:
-            value("awcWorkerNumber"),
-
-        mobile1:
-            value("mobile1"),
-
-        mobile2:
-            value("mobile2"),
-
-        mobile3:
-            value("mobile3"),
-
-        status:
-            value("referralStatus") || "Pending",
-
-        referType:
-            value("referType"),
-
-        privateHospital:
-            value("privateHospital"),
-
-        otherHospitalName:
-            value("otherHospitalName"),
-
-        estimatedTreatmentExpenditure:
-            value("estimatedTreatmentExpenditure"),
-
-        updatedAt:
-            serverTimestamp()
-    };
-
-
-    try {
-
-        const submitBtn =
-            $("referralSubmitBtn");
-
-        if (submitBtn) {
-            submitBtn.disabled = true;
-            submitBtn.textContent =
-                editingReferralId
-                    ? "Updating..."
-                    : "Saving...";
-        }
-
-
-        if (editingReferralId) {
-
-            const referralRef = doc(
-                db,
-                "users",
-                currentUser.uid,
-                "referrals",
-                editingReferralId
-            );
-
-            await updateDoc(
-                referralRef,
-                data
-            );
-
-            alert("Referral updated successfully.");
-
-        } else {
-
-            data.createdAt =
-                serverTimestamp();
-
-            data.createdBy =
-                currentUser.uid;
-
-            await addDoc(
-                collection(
-                    db,
-                    "users",
-                    currentUser.uid,
-                    "referrals"
-                ),
-                data
-            );
-
-            alert("Referral saved successfully.");
-        }
-
-
-        closeModal("referralModal");
-
-        resetReferralForm();
-
-        await loadReferrals();
-
-
-    } catch (error) {
-
-        console.error(
-            "Save referral error:",
-            error
-        );
-
-        alert(
-            "Unable to save referral:\n" +
-            error.message
-        );
-
-    } finally {
-
-        const submitBtn =
-            $("referralSubmitBtn");
-
-        if (submitBtn) {
-
-            submitBtn.disabled = false;
-
-            submitBtn.textContent =
-                editingReferralId
-                    ? "Update Referral"
-                    : "Save Referral";
-        }
-    }
-};
 
 
 // =====================================================
@@ -647,1364 +941,1813 @@ window.saveReferral = async function (event) {
 
 function fillReferralForm(record) {
 
-    setValue(
-        "childName",
-        record.childName
-    );
-
-    setValue(
-        "sex",
-        record.sex
-    );
-
-    setValue(
-        "dob",
-        record.dob
-    );
-
-    setValue(
-        "birthCertificateNumber",
-        record.birthCertificateNumber
-    );
-
-    setValue(
-        "fatherName",
-        record.fatherName
-    );
-
-    setValue(
-        "fatherAadhaar",
-        record.fatherAadhaar
-    );
-
-    setValue(
-        "motherName",
-        record.motherName
-    );
-
-    setValue(
-        "motherAadhaar",
-        record.motherAadhaar
-    );
-
-    setValue(
-        "villageName",
-        record.villageName
-    );
-
-    setValue(
-        "weight",
-        record.weight
-    );
-
-    setValue(
-        "height",
-        record.height
-    );
+    $("childName").value =
+        record.childName ||
+        record.name ||
+        "";
 
 
-    // Defects
+    $("sex").value =
+        record.sex ||
+        "";
+
+
+    $("dob").value =
+        record.dob ||
+        "";
+
+
+    $("birthCertificateNo").value =
+        record.birthCertificateNo ||
+        "";
+
+
+    $("fatherName").value =
+        record.fatherName ||
+        "";
+
+
+    $("fatherAadhaar").value =
+        record.fatherAadhaar ||
+        "";
+
+
+    $("motherName").value =
+        record.motherName ||
+        "";
+
+
+    $("motherAadhaar").value =
+        record.motherAadhaar ||
+        "";
+
+
+    $("villageName").value =
+        record.villageName ||
+        "";
+
+
+    $("weight").value =
+        record.weight ||
+        "";
+
+
+    $("height").value =
+        record.height ||
+        "";
+
+
     setSelectedDefects(
-        record.defects || []
+        record.defects?.length
+            ? record.defects
+            : (
+                record.defect
+                    ? [record.defect]
+                    : []
+            )
     );
 
 
-    // Institute
-    setValue(
-        "instituteType",
-        record.instituteType
-    );
-
-    setValue(
-        "instituteName",
-        record.instituteName
-    );
-
-    setValue(
-        "className",
-        record.className
-    );
-
-    setValue(
-        "awcWorkerNumber",
-        record.awcWorkerNumber
-    );
+    const type =
+        record.instituteType ||
+        record.type ||
+        "";
 
 
-    // Mobiles
-    setValue(
-        "mobile1",
-        record.mobile1
-    );
-
-    setValue(
-        "mobile2",
-        record.mobile2
-    );
-
-    setValue(
-        "mobile3",
-        record.mobile3
-    );
+    $("instituteType").value =
+        type;
 
 
-    // Status
-    setValue(
-        "referralStatus",
-        record.status || "Pending"
-    );
-
-    setValue(
-        "referType",
-        record.referType
-    );
-
-    setValue(
-        "privateHospital",
-        record.privateHospital
-    );
-
-    setValue(
-        "otherHospitalName",
-        record.otherHospitalName
-    );
-
-    setValue(
-        "estimatedTreatmentExpenditure",
-        record.estimatedTreatmentExpenditure
-    );
+    $("instituteName").value =
+        record.instituteName ||
+        "";
 
 
-    updateInstituteFields();
+    $("className").value =
+        record.className ||
+        "";
 
-    updateStatusFields();
+
+    $("awcWorkerNumber").value =
+        record.awcWorkerNumber ||
+        "";
 
 
-    const title =
-        $("referralModalTitle");
+    $("mobile1").value =
+        record.mobile1 ||
+        "";
 
-    if (title) {
-        title.textContent =
-            "Edit Referral";
-    }
 
-    const submitBtn =
-        $("referralSubmitBtn");
+    $("mobile2").value =
+        record.mobile2 ||
+        "";
 
-    if (submitBtn) {
 
-        submitBtn.textContent =
-            "Update Referral";
-    }
+    $("mobile3").value =
+        record.mobile3 ||
+        "";
+
+
+    updateInstituteFields(type);
+
 }
+
+
+// =====================================================
+// INSTITUTE FIELDS
+// =====================================================
+
+function updateInstituteFields(type) {
+
+    if ($("classWrap")) {
+
+        $("classWrap").hidden =
+            type !== "School";
+
+    }
+
+
+    if ($("awcWrap")) {
+
+        $("awcWrap").hidden =
+            type !== "AWC";
+
+    }
+
+
+    if ($("mobile3Label")) {
+
+        $("mobile3Label").textContent =
+            type === "School"
+                ? "School Principal Mobile Number"
+                : type === "AWC"
+                    ? "AWC Worker Mobile Number"
+                    : "Mobile 3";
+
+    }
+
+
+    if (
+        type !== "School" &&
+        $("className")
+    ) {
+
+        $("className").value = "";
+
+    }
+
+
+    if (
+        type !== "AWC" &&
+        $("awcWorkerNumber")
+    ) {
+
+        $("awcWorkerNumber").value = "";
+
+    }
+
+}
+
+
+// =====================================================
+// NEW REFERRAL
+// =====================================================
+
+$("newReferral")?.addEventListener(
+    "click",
+    () => {
+
+        resetReferralForm();
+
+        show("referralModal");
+
+    }
+);
 
 
 // =====================================================
 // EDIT REFERRAL
 // =====================================================
 
-window.editReferral = function (id) {
+window.editReferral = id => {
 
     const record =
-        records.find(
-            item => item.id === id
-        );
+        findRecord(id);
+
 
     if (!record) {
 
-        alert("Referral not found.");
+        alert(
+            "Referral record not found."
+        );
+
         return;
+
     }
 
-    editingReferralId = id;
 
-    fillReferralForm(record);
+    editingReferralId =
+        record.id;
 
-    openModal("referralModal");
+
+    fillReferralForm(
+        record
+    );
+
+
+    $("referralModalTitle").textContent =
+        "Edit Referral";
+
+
+    $("saveReferralButton").textContent =
+        "Save Changes";
+
+
+    hide("detailsModal");
+
+    show("referralModal");
+
 };
 
 
 // =====================================================
-// LOAD REFERRALS
+// SAVE REFERRAL
 // =====================================================
 
-async function loadReferrals() {
+$("referralForm")?.addEventListener(
+    "submit",
+    async event => {
 
-    if (!currentUser) return;
-
-    try {
-
-        const referralsRef =
-            collection(
-                db,
-                "users",
-                currentUser.uid,
-                "referrals"
-            );
-
-        const q = query(
-            referralsRef,
-            orderBy(
-                "createdAt",
-                "desc"
-            )
-        );
-
-        const snapshot =
-            await getDocs(q);
-
-        records = [];
-
-        snapshot.forEach(
-            snapshotDoc => {
-
-                records.push({
-                    id: snapshotDoc.id,
-                    ...snapshotDoc.data()
-                });
-
-            }
-        );
+        event.preventDefault();
 
 
-        renderReferrals();
-
-        updateStats();
-
-    } catch (error) {
-
-        console.error(
-            "Load referrals error:",
-            error
-        );
-
-        // Fallback without orderBy
-        try {
-
-            const referralsRef =
-                collection(
-                    db,
-                    "users",
-                    currentUser.uid,
-                    "referrals"
-                );
-
-            const snapshot =
-                await getDocs(
-                    referralsRef
-                );
-
-            records = [];
-
-            snapshot.forEach(
-                snapshotDoc => {
-
-                    records.push({
-                        id: snapshotDoc.id,
-                        ...snapshotDoc.data()
-                    });
-
-                }
-            );
-
-            records.sort(
-                (a, b) => {
-
-                    const aTime =
-                        a.createdAt?.seconds || 0;
-
-                    const bTime =
-                        b.createdAt?.seconds || 0;
-
-                    return bTime - aTime;
-                }
-            );
-
-            renderReferrals();
-
-            updateStats();
-
-        } catch (fallbackError) {
-
-            console.error(
-                fallbackError
-            );
+        if (!currentUser) {
 
             alert(
-                "Unable to load referrals:\n" +
-                fallbackError.message
+                "Your session has expired. Please login again."
             );
+
+            return;
+
         }
-    }
-}
 
 
-// =====================================================
-// STATUS BADGE
-// =====================================================
-
-function statusBadge(status) {
-
-    const safe =
-        status || "Pending";
-
-    const className =
-        safe
-            .toLowerCase()
-            .replace(/\s+/g, "-");
-
-    return `
-        <span class="status-badge ${className}">
-            ${escapeHtml(safe)}
-        </span>
-    `;
-}
+        const button =
+            $("saveReferralButton");
 
 
-// =====================================================
-// ESCAPE HTML
-// =====================================================
-
-function escapeHtml(value) {
-
-    return String(value ?? "")
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
-}
+        const type =
+            value("instituteType");
 
 
-// =====================================================
-// FILTER / SEARCH
-// =====================================================
+        const child =
+            value("childName");
 
-function getFilteredRecords() {
 
-    const search =
-        (
-            value("searchInput") ||
-            value("search") ||
-            ""
-        ).toLowerCase();
+        const institute =
+            value("instituteName");
 
-    const status =
-        value("statusFilter");
 
-    const instituteType =
-        value("instituteFilter");
+        const defects =
+            selectedDefects();
 
-    return records.filter(
-        record => {
 
-            const searchable = [
-                record.childName,
-                record.fatherName,
-                record.motherName,
-                record.villageName,
-                record.instituteName,
-                record.mobile1,
-                record.mobile2,
-                record.mobile3,
-                record.birthCertificateNumber
-            ]
-                .join(" ")
-                .toLowerCase();
+        // -------------------------------------------------
+        // VALIDATION
+        // -------------------------------------------------
 
-            const searchMatch =
-                !search ||
-                searchable.includes(search);
+        if (!child) {
 
-            const statusMatch =
-                !status ||
-                status === "All" ||
-                record.status === status;
-
-            const instituteMatch =
-                !instituteType ||
-                instituteType === "All" ||
-                record.instituteType === instituteType;
-
-            return (
-                searchMatch &&
-                statusMatch &&
-                instituteMatch
+            alert(
+                "Please enter child name."
             );
-        }
-    );
-}
 
+            return;
 
-// =====================================================
-// RENDER REFERRALS
-// =====================================================
-
-function renderReferrals() {
-
-    const list =
-        getFilteredRecords();
-
-    const container =
-        $("referralList") ||
-        $("referralsList") ||
-        $("referralTableBody");
-
-    if (!container) return;
-
-
-    if (!list.length) {
-
-        container.innerHTML = `
-            <div class="empty-state">
-                <div class="empty-icon">📋</div>
-                <h3>No Referrals Found</h3>
-                <p>Create a new referral to get started.</p>
-            </div>
-        `;
-
-        return;
-    }
-
-
-    // If table body
-    if (
-        container.tagName === "TBODY"
-    ) {
-
-        container.innerHTML =
-            list.map(record => `
-
-                <tr>
-
-                    <td>
-                        ${escapeHtml(
-                            record.childName
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            record.sex || "-"
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            record.villageName || "-"
-                        )}
-                    </td>
-
-                    <td>
-                        ${escapeHtml(
-                            record.instituteName || "-"
-                        )}
-                    </td>
-
-                    <td>
-                        ${statusBadge(
-                            record.status
-                        )}
-                    </td>
-
-                    <td>
-                        <button
-                            type="button"
-                            onclick="viewReferral('${record.id}')"
-                        >
-                            View
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="editReferral('${record.id}')"
-                        >
-                            Edit
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="openStatus('${record.id}')"
-                        >
-                            Status
-                        </button>
-
-                        <button
-                            type="button"
-                            onclick="confirmDelete('${record.id}')"
-                        >
-                            Delete
-                        </button>
-                    </td>
-
-                </tr>
-
-            `).join("");
-
-        return;
-    }
-
-
-    // Card layout
-    container.innerHTML =
-        list.map(record => `
-
-            <div class="referral-card">
-
-                <div class="referral-card-header">
-
-                    <div>
-
-                        <h3>
-                            ${escapeHtml(
-                                record.childName ||
-                                "Unnamed Child"
-                            )}
-                        </h3>
-
-                        <small>
-                            ${escapeHtml(
-                                record.sex || ""
-                            )}
-                            ${record.dob
-                                ? " • " +
-                                  escapeHtml(record.dob)
-                                : ""}
-                        </small>
-
-                    </div>
-
-                    ${statusBadge(
-                        record.status
-                    )}
-
-                </div>
-
-
-                <div class="referral-card-body">
-
-                    <div>
-                        <strong>Village:</strong>
-                        ${escapeHtml(
-                            record.villageName || "-"
-                        )}
-                    </div>
-
-                    <div>
-                        <strong>Institute:</strong>
-                        ${escapeHtml(
-                            record.instituteName || "-"
-                        )}
-                    </div>
-
-                    <div>
-                        <strong>Condition:</strong>
-                        ${escapeHtml(
-                            (record.defects || []).join(", ") || "-"
-                        )}
-                    </div>
-
-                </div>
-
-
-                <div class="referral-card-actions">
-
-                    <button
-                        type="button"
-                        onclick="viewReferral('${record.id}')"
-                    >
-                        View
-                    </button>
-
-                    <button
-                        type="button"
-                        onclick="editReferral('${record.id}')"
-                    >
-                        Edit
-                    </button>
-
-                    <button
-                        type="button"
-                        onclick="openStatus('${record.id}')"
-                    >
-                        Status
-                    </button>
-
-                    <button
-                        type="button"
-                        onclick="confirmDelete('${record.id}')"
-                    >
-                        Delete
-                    </button>
-
-                </div>
-
-            </div>
-
-        `).join("");
-}
-
-
-// =====================================================
-// SEARCH / FILTER EVENTS
-// =====================================================
-
-function applyFilters() {
-
-    renderReferrals();
-}
-
-
-document.addEventListener(
-    "input",
-    event => {
-
-        if (
-            event.target.id === "searchInput" ||
-            event.target.id === "search"
-        ) {
-
-            applyFilters();
-        }
-    }
-);
-
-
-document.addEventListener(
-    "change",
-    event => {
-
-        if (
-            event.target.id === "statusFilter" ||
-            event.target.id === "instituteFilter"
-        ) {
-
-            applyFilters();
         }
 
-        if (
-            event.target.id === "instituteType"
-        ) {
 
-            updateInstituteFields();
+        if (!$("sex").value) {
+
+            alert(
+                "Please select sex."
+            );
+
+            return;
+
         }
 
-        if (
-            event.target.id === "otherDefectCheckbox"
-        ) {
 
-            updateOtherDefectVisibility();
+        if (!$("dob").value) {
+
+            alert(
+                "Please select date of birth."
+            );
+
+            return;
+
         }
 
-        if (
-            event.target.id === "referralStatus"
-        ) {
 
-            updateStatusFields();
+        if (!defects.length) {
+
+            alert(
+                "Please select at least one defect / health condition."
+            );
+
+            return;
+
         }
+
+
+        if (!type) {
+
+            alert(
+                "Please select institute type."
+            );
+
+            return;
+
+        }
+
+
+        if (!institute) {
+
+            alert(
+                "Please enter institute name."
+            );
+
+            return;
+
+        }
+
+
+        if (button) {
+
+            button.disabled = true;
+
+            button.textContent =
+                "Saving...";
+
+        }
+
+
+        // -------------------------------------------------
+        // DATA
+        // -------------------------------------------------
+
+        const data = {
+
+            childName:
+                child,
+
+            sex:
+                value("sex"),
+
+            dob:
+                value("dob"),
+
+            birthCertificateNo:
+                value(
+                    "birthCertificateNo"
+                ),
+
+            fatherName:
+                value("fatherName"),
+
+            fatherAadhaar:
+                cleanAadhaar(
+                    value("fatherAadhaar")
+                ),
+
+            motherName:
+                value("motherName"),
+
+            motherAadhaar:
+                cleanAadhaar(
+                    value("motherAadhaar")
+                ),
+
+            villageName:
+                value("villageName"),
+
+            weight:
+                value("weight"),
+
+            height:
+                value("height"),
+
+            defects:
+
+                defects,
+
+            defect:
+
+                defects.join(", "),
+
+            instituteType:
+
+                type,
+
+            instituteName:
+
+                institute,
+
+            className:
+
+                type === "School"
+                    ? value("className")
+                    : "",
+
+            awcWorkerNumber:
+
+                type === "AWC"
+                    ? value("awcWorkerNumber")
+                    : "",
+
+            mobile1:
+
+                cleanMobile(
+                    value("mobile1")
+                ),
+
+            mobile2:
+
+                cleanMobile(
+                    value("mobile2")
+                ),
+
+            mobile3:
+
+                cleanMobile(
+                    value("mobile3")
+                ),
+
+            updatedAt:
+                serverTimestamp()
+
+        };
+
+
+        // -------------------------------------------------
+        // SAVE / UPDATE
+        // -------------------------------------------------
+
+        try {
+
+            if (editingReferralId) {
+
+                await updateDoc(
+                    referralDocument(
+                        editingReferralId
+                    ),
+                    data
+                );
+
+
+                hide(
+                    "referralModal"
+                );
+
+
+                editingReferralId =
+                    null;
+
+
+                await loadRecords();
+
+
+                alert(
+                    "Referral updated successfully."
+                );
+
+
+            } else {
+
+                const registrationDate =
+                    today();
+
+
+                await addDoc(
+                    referralsCollection(),
+                    {
+
+                        ...data,
+
+                        status:
+                            "Pending",
+
+                        registeredDate:
+                            registrationDate,
+
+                        referredDate:
+                            "",
+
+                        treatmentStartedDate:
+                            "",
+
+                        completedDate:
+                            "",
+
+                        referralDate:
+                            registrationDate,
+
+                        referType:
+                            "",
+
+                        privateHospital:
+                            "",
+
+                        otherHospitalName:
+                            "",
+
+                        hospitalName:
+                            "",
+
+                        estimatedTreatmentExpenditure:
+                            "",
+
+                        createdAt:
+                            serverTimestamp()
+
+                    }
+                );
+
+
+                resetReferralForm();
+
+
+                hide(
+                    "referralModal"
+                );
+
+
+                await loadRecords();
+
+
+                alert(
+                    "Referral saved successfully."
+                );
+
+            }
+
+
+        } catch (error) {
+
+            alert(
+                firebaseErrorMessage(
+                    error
+                )
+            );
+
+
+        } finally {
+
+            if (button) {
+
+                button.disabled = false;
+
+                button.textContent =
+                    editingReferralId
+                        ? "Save Changes"
+                        : "Save Referral";
+
+            }
+
+        }
+
     }
 );
 
 
 // =====================================================
-// STATS
+// DEFECT CHANGE
 // =====================================================
 
-function updateStats() {
-
-    const total =
-        records.length;
-
-    const pending =
-        records.filter(
-            r => (r.status || "Pending") === "Pending"
-        ).length;
-
-    const referred =
-        records.filter(
-            r => r.status === "Referred"
-        ).length;
-
-    const treatment =
-        records.filter(
-            r => r.status === "Treatment Started"
-        ).length;
-
-    const completed =
-        records.filter(
-            r => r.status === "Completed"
-        ).length;
-
-
-    setText(
-        "totalCount",
-        total
-    );
-
-    setText(
-        "pendingCount",
-        pending
-    );
-
-    setText(
-        "referredCount",
-        referred
-    );
-
-    setText(
-        "treatmentCount",
-        treatment
-    );
-
-    setText(
-        "completedCount",
-        completed
+$("otherDefectCheckbox")
+    ?.addEventListener(
+        "change",
+        updateOtherDefectVisibility
     );
 
 
-    // Alternative IDs
-    setText(
-        "totalReferrals",
-        total
+// =====================================================
+// INSTITUTE CHANGE
+// =====================================================
+
+$("instituteType")
+    ?.addEventListener(
+        "change",
+        event => {
+
+            updateInstituteFields(
+                event.target.value
+            );
+
+        }
     );
-
-    setText(
-        "pendingReferrals",
-        pending
-    );
-
-    setText(
-        "referredReferrals",
-        referred
-    );
-
-    setText(
-        "treatmentStarted",
-        treatment
-    );
-
-    setText(
-        "completedReferrals",
-        completed
-    );
-}
-
-
-function setText(id, text) {
-
-    const el = $(id);
-
-    if (el) {
-        el.textContent = text;
-    }
-}
 
 
 // =====================================================
 // STATUS MODAL
 // =====================================================
 
-window.openStatus = function (id) {
+window.openStatus = id => {
 
     const record =
-        records.find(
-            item => item.id === id
-        );
+        findRecord(id);
+
 
     if (!record) {
 
-        alert("Referral not found.");
+        alert(
+            "Referral record not found."
+        );
+
         return;
+
     }
 
-    currentReferralId = id;
+
+    currentReferralId =
+        id;
 
 
-    setValue(
-        "statusModalStatus",
-        record.status || "Pending"
-    );
+    $("newStatus").value =
+        record.status ||
+        "Pending";
 
-    setValue(
-        "statusModalReferType",
-        record.referType || ""
-    );
 
-    setValue(
-        "statusModalPrivateHospital",
-        record.privateHospital || ""
-    );
+    $("referType").value =
+        record.referType ||
+        "";
 
-    setValue(
-        "statusModalOtherHospital",
-        record.otherHospitalName || ""
-    );
 
-    setValue(
-        "statusModalOtherHospitalName",
-        record.otherHospitalName || ""
-    );
+    $("privateHospital").value =
+        record.privateHospital ||
+        "";
 
-    setValue(
-        "statusModalHospitalName",
-        record.hospitalName || ""
-    );
 
-    setValue(
-        "statusModalEstimatedTreatmentExpenditure",
-        record.estimatedTreatmentExpenditure || ""
-    );
+    $("otherHospitalName").value =
+        record.otherHospitalName ||
+        "";
 
+
+    $("hospitalName").value =
+        record.hospitalName ||
+        "";
+
+
+    $("estimatedExpenditure").value =
+        record.estimatedTreatmentExpenditure ||
+        "";
+
+
+    updateReferralTypeUI();
 
     toggleTreatment();
 
-    openModal("statusModal");
+    show("statusModal");
+
 };
+
+
+// =====================================================
+// REFERRAL TYPE UI
+// =====================================================
+
+function updateReferralTypeUI() {
+
+    const referType =
+        $("referType")?.value || "";
+
+
+    const privateHospitalVisible =
+        referType ===
+        "Private Hospital";
+
+
+    if ($("privateHospitalWrap")) {
+
+        $("privateHospitalWrap").hidden =
+            !privateHospitalVisible;
+
+    }
+
+
+    if ($("otherHospitalWrap")) {
+
+        $("otherHospitalWrap").hidden =
+            !privateHospitalVisible ||
+            $("privateHospital")?.value !==
+                "Other";
+
+    }
+
+}
+
+
+// =====================================================
+// TREATMENT UI
+// =====================================================
+
+function toggleTreatment() {
+
+    const status =
+        $("newStatus")?.value || "Pending";
+
+
+    const needsTreatment =
+        [
+            "Referred",
+            "Treatment Started",
+            "Completed"
+        ].includes(status);
+
+
+    if ($("referTypeWrap")) {
+
+        $("referTypeWrap").hidden =
+            !needsTreatment;
+
+    }
+
+
+    if ($("treatmentFields")) {
+
+        $("treatmentFields").hidden =
+            !needsTreatment;
+
+    }
+
+
+    if ($("hospitalName")) {
+
+        $("hospitalName").required =
+            needsTreatment;
+
+    }
+
+
+    if ($("estimatedExpenditure")) {
+
+        $("estimatedExpenditure").required =
+            needsTreatment;
+
+    }
+
+
+    updateReferralTypeUI();
+
+}
+
+
+// =====================================================
+// STATUS EVENTS
+// =====================================================
+
+$("referType")
+    ?.addEventListener(
+        "change",
+        updateReferralTypeUI
+    );
+
+
+$("privateHospital")
+    ?.addEventListener(
+        "change",
+        updateReferralTypeUI
+    );
+
+
+$("newStatus")
+    ?.addEventListener(
+        "change",
+        toggleTreatment
+    );
 
 
 // =====================================================
 // SAVE STATUS
 // =====================================================
 
-window.saveStatus = async function () {
+$("statusForm")?.addEventListener(
+    "submit",
+    async event => {
 
-    if (!currentUser || !currentReferralId) {
-        return;
-    }
-
-
-    const status =
-        value("statusModalStatus") ||
-        "Pending";
-
-    const referType =
-        value("statusModalReferType");
-
-    const privateHospital =
-        value("statusModalPrivateHospital");
-
-    const otherHospitalName =
-        value("statusModalOtherHospitalName") ||
-        value("statusModalOtherHospital");
-
-    const hospitalName =
-        value("statusModalHospitalName");
-
-    const estimated =
-        value(
-            "statusModalEstimatedTreatmentExpenditure"
-        );
+        event.preventDefault();
 
 
-    try {
+        if (
+            !currentReferralId ||
+            !currentUser
+        ) {
 
-        const referralRef =
-            doc(
-                db,
-                "users",
-                currentUser.uid,
-                "referrals",
-                currentReferralId
+            return;
+
+        }
+
+
+        const status =
+            $("newStatus").value;
+
+
+        const needsTreatment =
+            [
+                "Referred",
+                "Treatment Started",
+                "Completed"
+            ].includes(status);
+
+
+        const referType =
+            $("referType").value;
+
+
+        const privateHospital =
+            $("privateHospital").value;
+
+
+        const otherHospital =
+            value(
+                "otherHospitalName"
             );
 
 
-        const updateData = {
-
-            status,
-
-            referType,
-
-            privateHospital,
-
-            otherHospitalName,
-
-            hospitalName,
-
-            estimatedTreatmentExpenditure:
-                estimated,
-
-            updatedAt:
-                serverTimestamp()
-        };
+        const hospital =
+            value(
+                "hospitalName"
+            );
 
 
-        if (status === "Referred") {
+        const expenditure =
+            value(
+                "estimatedExpenditure"
+            );
 
-            updateData.referredAt =
-                serverTimestamp();
 
-        }
+        // -------------------------------------------------
+        // VALIDATION
+        // -------------------------------------------------
 
-        if (status === "Treatment Started") {
+        if (
+            needsTreatment &&
+            !referType
+        ) {
 
-            updateData.treatmentStartedAt =
-                serverTimestamp();
+            alert(
+                "Please select Refer Type."
+            );
 
-        }
-
-        if (status === "Completed") {
-
-            updateData.completedAt =
-                serverTimestamp();
+            return;
 
         }
 
 
-        await updateDoc(
-            referralRef,
-            updateData
-        );
+        if (
+            needsTreatment &&
+            referType ===
+                "Private Hospital" &&
+            !privateHospital
+        ) {
+
+            alert(
+                "Please select private hospital."
+            );
+
+            return;
+
+        }
 
 
-        closeModal("statusModal");
+        if (
+            needsTreatment &&
+            referType ===
+                "Private Hospital" &&
+            privateHospital ===
+                "Other" &&
+            !otherHospital
+        ) {
 
-        await loadReferrals();
+            alert(
+                "Please enter hospital name."
+            );
 
-        alert(
-            "Referral status updated successfully."
-        );
+            return;
+
+        }
 
 
-    } catch (error) {
+        if (
+            needsTreatment &&
+            !hospital
+        ) {
 
-        console.error(
-            "Status update error:",
-            error
-        );
+            alert(
+                "Please enter hospital name."
+            );
 
-        alert(
-            "Unable to update status:\n" +
-            error.message
-        );
+            return;
+
+        }
+
+
+        if (
+            needsTreatment &&
+            !expenditure
+        ) {
+
+            alert(
+                "Please enter estimated treatment expenditure."
+            );
+
+            return;
+
+        }
+
+
+        const button =
+            event.target.querySelector(
+                'button[type="submit"]'
+            );
+
+
+        if (button) {
+
+            button.disabled = true;
+
+            button.textContent =
+                "Updating...";
+
+        }
+
+
+        try {
+
+            const data = {
+
+                status:
+
+                    status,
+
+                updatedAt:
+
+                    serverTimestamp(),
+
+                referType:
+
+                    needsTreatment
+                        ? referType
+                        : "",
+
+                privateHospital:
+
+                    needsTreatment &&
+                    referType ===
+                        "Private Hospital"
+                        ? privateHospital
+                        : "",
+
+                otherHospitalName:
+
+                    needsTreatment &&
+                    referType ===
+                        "Private Hospital" &&
+                    privateHospital ===
+                        "Other"
+                        ? otherHospital
+                        : "",
+
+                hospitalName:
+
+                    needsTreatment
+                        ? hospital
+                        : "",
+
+                estimatedTreatmentExpenditure:
+
+                    needsTreatment
+                        ? expenditure
+                        : ""
+
+            };
+
+
+            if (
+                status ===
+                "Pending"
+            ) {
+
+                data.registeredDate =
+                    today();
+
+            }
+
+
+            if (
+                status ===
+                "Referred"
+            ) {
+
+                data.referredDate =
+                    today();
+
+            }
+
+
+            if (
+                status ===
+                "Treatment Started"
+            ) {
+
+                data.treatmentStartedDate =
+                    today();
+
+            }
+
+
+            if (
+                status ===
+                "Completed"
+            ) {
+
+                data.completedDate =
+                    today();
+
+            }
+
+
+            await updateDoc(
+                referralDocument(
+                    currentReferralId
+                ),
+                data
+            );
+
+
+            hide(
+                "statusModal"
+            );
+
+
+            currentReferralId =
+                null;
+
+
+            await loadRecords();
+
+
+        } catch (error) {
+
+            alert(
+                firebaseErrorMessage(
+                    error
+                )
+            );
+
+
+        } finally {
+
+            if (button) {
+
+                button.disabled = false;
+
+                button.textContent =
+                    "Update";
+
+            }
+
+        }
+
     }
-};
+);
 
 
 // =====================================================
-// CLOSE STATUS
+// VIEW DETAILS
 // =====================================================
 
-window.closeStatusModal = function () {
-
-    closeModal("statusModal");
-
-};
-
-
-// =====================================================
-// VIEW REFERRAL
-// =====================================================
-
-window.viewReferral = function (id) {
+window.viewDetails = id => {
 
     const record =
-        records.find(
-            item => item.id === id
-        );
+        findRecord(id);
 
-    if (!record) {
 
-        alert("Referral not found.");
-        return;
-    }
+    if (!record) return;
 
-    const container =
-        $("detailsContent") ||
-        $("referralDetailsContent");
 
-    if (!container) {
-
-        console.log(
-            "Referral details:",
-            record
-        );
-
-        return;
-    }
+    currentReferralId =
+        id;
 
 
     const defects =
-        Array.isArray(record.defects)
-            ? record.defects
-            : [];
+        record.defects?.length
+            ? record.defects.join(", ")
+            : record.defect ||
+              "-";
 
 
-    container.innerHTML = `
+    const privateHospital =
+        record.privateHospital ===
+            "Other"
+            ? record.otherHospitalName
+            : record.privateHospital;
+
+
+    $("detailsSubtitle").textContent =
+        `${record.childName || record.name || "-"} • ${
+            record.instituteType ||
+            record.type ||
+            "-"
+        }`;
+
+
+    $("detailsContent").innerHTML = `
 
         <div class="details-section">
 
-            <h3>Child Details</h3>
+            <h4>
+                Child Information
+            </h4>
 
-            <p>
-                <strong>Name:</strong>
-                ${escapeHtml(
-                    record.childName || "-"
-                )}
-            </p>
 
-            <p>
-                <strong>Sex:</strong>
-                ${escapeHtml(
-                    record.sex || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Child Name</span>
+                <strong>
+                    ${esc(
+                        record.childName ||
+                        record.name ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
-            <p>
-                <strong>DOB:</strong>
-                ${escapeHtml(
-                    record.dob || "-"
-                )}
-            </p>
 
-            <p>
-                <strong>Birth Certificate No:</strong>
-                ${escapeHtml(
-                    record.birthCertificateNumber || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Sex</span>
+                <strong>
+                    ${esc(
+                        record.sex ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
-            <p>
-                <strong>Village:</strong>
-                ${escapeHtml(
-                    record.villageName || "-"
-                )}
-            </p>
 
-            <p>
-                <strong>Weight:</strong>
-                ${escapeHtml(
-                    record.weight || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Date of Birth</span>
+                <strong>
+                    ${esc(
+                        formatDate(
+                            record.dob
+                        )
+                    )}
+                </strong>
+            </div>
 
-            <p>
-                <strong>Height:</strong>
-                ${escapeHtml(
-                    record.height || "-"
-                )}
-            </p>
+
+            <div class="details-row">
+                <span>Birth Certificate</span>
+                <strong>
+                    ${esc(
+                        record.birthCertificateNo ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>Village</span>
+                <strong>
+                    ${esc(
+                        record.villageName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
         </div>
 
 
         <div class="details-section">
 
-            <h3>Parent Details</h3>
-
-            <p>
-                <strong>Father Name:</strong>
-                ${escapeHtml(
-                    record.fatherName || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Father Aadhaar:</strong>
-                ${escapeHtml(
-                    record.fatherAadhaar || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Mother Name:</strong>
-                ${escapeHtml(
-                    record.motherName || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Mother Aadhaar:</strong>
-                ${escapeHtml(
-                    record.motherAadhaar || "-"
-                )}
-            </p>
-
-        </div>
+            <h4>
+                Parent Information
+            </h4>
 
 
-        <div class="details-section">
-
-            <h3>Health Condition</h3>
-
-            <p>
-                ${defects.length
-                    ? defects.map(
-                        d =>
-                            `<span class="condition-tag">
-                                ${escapeHtml(d)}
-                            </span>`
-                      ).join(" ")
-                    : "-"
-                }
-            </p>
-
-        </div>
+            <div class="details-row">
+                <span>Father Name</span>
+                <strong>
+                    ${esc(
+                        record.fatherName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
 
-        <div class="details-section">
+            <div class="details-row">
+                <span>Father Aadhaar</span>
+                <strong>
+                    ${esc(
+                        record.fatherAadhaar ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
-            <h3>Institute Details</h3>
 
-            <p>
-                <strong>Type:</strong>
-                ${escapeHtml(
-                    record.instituteType || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Mother Name</span>
+                <strong>
+                    ${esc(
+                        record.motherName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
-            <p>
-                <strong>Institute:</strong>
-                ${escapeHtml(
-                    record.instituteName || "-"
-                )}
-            </p>
 
-            <p>
-                <strong>Class:</strong>
-                ${escapeHtml(
-                    record.className || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>AWC Worker:</strong>
-                ${escapeHtml(
-                    record.awcWorkerNumber || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Mother Aadhaar</span>
+                <strong>
+                    ${esc(
+                        record.motherAadhaar ||
+                        "-"
+                    )}
+                </strong>
+            </div>
 
         </div>
 
 
         <div class="details-section">
 
-            <h3>Contact Details</h3>
-
-            <p>
-                <strong>Mobile 1:</strong>
-                ${escapeHtml(
-                    record.mobile1 || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Mobile 2:</strong>
-                ${escapeHtml(
-                    record.mobile2 || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Mobile 3:</strong>
-                ${escapeHtml(
-                    record.mobile3 || "-"
-                )}
-            </p>
-
-        </div>
+            <h4>
+                Health Information
+            </h4>
 
 
-        <div class="details-section">
+            <div class="details-row">
+                <span>
+                    Defect / Health Condition
+                </span>
 
-            <h3>Referral / Treatment</h3>
+                <strong>
+                    ${esc(defects)}
+                </strong>
+            </div>
 
-            <p>
-                <strong>Status:</strong>
-                ${statusBadge(
-                    record.status
-                )}
-            </p>
 
-            <p>
-                <strong>Refer Type:</strong>
-                ${escapeHtml(
-                    record.referType || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Weight</span>
+                <strong>
+                    ${esc(
+                        record.weight ||
+                        "-"
+                    )}
+                    kg
+                </strong>
+            </div>
 
-            <p>
-                <strong>Private Hospital:</strong>
-                ${escapeHtml(
-                    record.privateHospital || "-"
-                )}
-            </p>
 
-            <p>
-                <strong>Other Hospital:</strong>
-                ${escapeHtml(
-                    record.otherHospitalName || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Hospital Name:</strong>
-                ${escapeHtml(
-                    record.hospitalName || "-"
-                )}
-            </p>
-
-            <p>
-                <strong>Estimated Treatment Expenditure:</strong>
-                ${escapeHtml(
-                    record.estimatedTreatmentExpenditure || "-"
-                )}
-            </p>
+            <div class="details-row">
+                <span>Height</span>
+                <strong>
+                    ${esc(
+                        record.height ||
+                        "-"
+                    )}
+                    cm
+                </strong>
+            </div>
 
         </div>
 
 
         <div class="details-section">
 
-            <h3>Documents</h3>
+            <h4>
+                Institute Information
+            </h4>
 
-            <p>
+
+            <div class="details-row">
+                <span>Institute Type</span>
+                <strong>
+                    ${esc(
+                        record.instituteType ||
+                        record.type ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>Institute Name</span>
+                <strong>
+                    ${esc(
+                        record.instituteName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>Class</span>
+                <strong>
+                    ${esc(
+                        record.className ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>AWC Worker Number</span>
+                <strong>
+                    ${esc(
+                        record.awcWorkerNumber ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="details-section">
+
+            <h4>
+                Contact Information
+            </h4>
+
+
+            <div class="details-row">
+                <span>Mobile 1</span>
+                <strong>
+                    ${esc(
+                        record.mobile1 ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>Mobile 2</span>
+                <strong>
+                    ${esc(
+                        record.mobile2 ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>
+                    ${
+                        record.instituteType ===
+                            "School"
+                            ? "School Principal Mobile Number"
+                            : record.instituteType ===
+                                "AWC"
+                                ? "AWC Worker Mobile Number"
+                                : "Mobile 3"
+                    }
+                </span>
+
+                <strong>
+                    ${esc(
+                        record.mobile3 ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="details-section">
+
+            <h4>
+                Referral / Treatment
+            </h4>
+
+
+            <div class="details-row">
+                <span>Status</span>
+                <strong>
+                    ${esc(
+                        record.status ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>Refer Type</span>
+                <strong>
+                    ${esc(
+                        record.referType ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>Hospital</span>
+                <strong>
+                    ${esc(
+                        privateHospital ||
+                        record.hospitalName ||
+                        "-"
+                    )}
+                </strong>
+            </div>
+
+
+            <div class="details-row">
+                <span>
+                    Estimated Expenditure
+                </span>
+
+                <strong>
+                    ${
+                        record.estimatedTreatmentExpenditure
+                            ? "₹ " +
+                              esc(
+                                  record.estimatedTreatmentExpenditure
+                              )
+                            : "-"
+                    }
+                </strong>
+            </div>
+
+        </div>
+
+
+        <div class="details-section">
+
+            <h4>
+                Documents / Attachments
+            </h4>
+
+            <div class="empty">
                 File upload is currently disabled.
-            </p>
+            </div>
 
         </div>
 
     `;
 
 
-    openModal("detailsModal");
-};
-
-
-// =====================================================
-// CLOSE DETAILS
-// =====================================================
-
-window.closeDetailsModal = function () {
-
-    closeModal("detailsModal");
+    show("detailsModal");
 
 };
 
 
 // =====================================================
-// DELETE CONFIRMATION
+// DETAILS → EDIT
 // =====================================================
 
-window.confirmDelete = function (id) {
+$("detailsEdit")
+    ?.addEventListener(
+        "click",
+        () => {
+
+            if (!currentReferralId)
+                return;
+
+
+            const id =
+                currentReferralId;
+
+
+            hide("detailsModal");
+
+
+            window.editReferral(
+                id
+            );
+
+        }
+    );
+
+
+// =====================================================
+// DELETE MODAL
+// =====================================================
+
+window.openDelete = id => {
 
     const record =
-        records.find(
-            item => item.id === id
-        );
+        findRecord(id);
+
 
     if (!record) return;
 
-    currentDeleteId = id;
 
-    const name =
-        $("deleteChildName");
+    currentDeleteId =
+        id;
 
-    if (name) {
 
-        name.textContent =
-            record.childName ||
-            "this referral";
-    }
+    $("deleteChildName").textContent =
+        record.childName ||
+        record.name ||
+        "this child";
 
-    openModal("deleteModal");
+
+    show("deleteModal");
+
 };
 
 
 // =====================================================
-// DELETE REFERRAL
+// CONFIRM DELETE
 // =====================================================
 
-window.deleteReferral = async function () {
+$("confirmDelete")
+    ?.addEventListener(
+        "click",
+        async () => {
 
-    if (
-        !currentUser ||
-        !currentDeleteId
-    ) {
-        return;
-    }
+            if (
+                !currentDeleteId ||
+                !currentUser
+            ) {
+
+                return;
+
+            }
 
 
-    try {
+            const button =
+                $("confirmDelete");
 
-        const referralRef =
-            doc(
-                db,
-                "users",
-                currentUser.uid,
-                "referrals",
-                currentDeleteId
+
+            if (button) {
+
+                button.disabled = true;
+
+                button.textContent =
+                    "Deleting...";
+
+            }
+
+
+            try {
+
+                await deleteDoc(
+                    referralDocument(
+                        currentDeleteId
+                    )
+                );
+
+
+                hide(
+                    "deleteModal"
+                );
+
+
+                currentDeleteId =
+                    null;
+
+
+                await loadRecords();
+
+
+                alert(
+                    "Referral deleted successfully."
+                );
+
+
+            } catch (error) {
+
+                alert(
+                    firebaseErrorMessage(
+                        error
+                    )
+                );
+
+
+            } finally {
+
+                if (button) {
+
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        "Delete Referral";
+
+                }
+
+            }
+
+        }
+    );
+
+
+// =====================================================
+// CLOSE BUTTONS
+// =====================================================
+
+document
+    .querySelectorAll(
+        "[data-close]"
+    )
+    .forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const id =
+                    button.dataset.close;
+
+
+                hide(id);
+
+
+                if (
+                    id ===
+                    "referralModal"
+                ) {
+
+                    editingReferralId =
+                        null;
+
+                }
+
+
+                if (
+                    id ===
+                    "statusModal"
+                ) {
+
+                    currentReferralId =
+                        null;
+
+                }
+
+
+                if (
+                    id ===
+                    "deleteModal"
+                ) {
+
+                    currentDeleteId =
+                        null;
+
+                }
+
+            }
+        );
+
+    });
+
+
+// =====================================================
+// CLICK OUTSIDE MODAL
+// =====================================================
+
+document
+    .querySelectorAll(
+        ".modal"
+    )
+    .forEach(modal => {
+
+        modal.addEventListener(
+            "click",
+            event => {
+
+                if (
+                    event.target ===
+                    modal
+                ) {
+
+                    hide(
+                        modal.id
+                    );
+
+                }
+
+            }
+        );
+
+    });
+
+
+// =====================================================
+// ESC KEY
+// =====================================================
+
+document.addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key !==
+            "Escape"
+        ) {
+
+            return;
+
+        }
+
+
+        document
+            .querySelectorAll(
+                ".modal.show"
+            )
+            .forEach(
+                modal => {
+
+                    hide(
+                        modal.id
+                    );
+
+                }
             );
 
-
-        await deleteDoc(
-            referralRef
-        );
-
-
-        closeModal("deleteModal");
-
-        currentDeleteId = null;
-
-        await loadReferrals();
-
-        alert(
-            "Referral deleted successfully."
-        );
-
-
-    } catch (error) {
-
-        console.error(
-            "Delete error:",
-            error
-        );
-
-        alert(
-            "Unable to delete referral:\n" +
-            error.message
-        );
     }
-};
+);
 
 
 // =====================================================
-// CLOSE DELETE
+// SEARCH
 // =====================================================
 
-window.closeDeleteModal = function () {
+$("search")
+    ?.addEventListener(
+        "input",
+        render
+    );
 
-    closeModal("deleteModal");
 
-    currentDeleteId = null;
-};
+// =====================================================
+// STATUS FILTER
+// =====================================================
+
+$("statusFilter")
+    ?.addEventListener(
+        "change",
+        render
+    );
+
+
+// =====================================================
+// INSTITUTE FILTER
+// =====================================================
+
+$("typeFilter")
+    ?.addEventListener(
+        "change",
+        render
+    );
 
 
 // =====================================================
 // LOGOUT
 // =====================================================
 
-window.logout = async function () {
+$("logout")
+    ?.addEventListener(
+        "click",
+        async () => {
 
-    try {
+            try {
 
-        await signOut(auth);
+                await signOut(
+                    auth
+                );
 
-        window.location.href =
-            "index.html";
 
-    } catch (error) {
+                location.href =
+                    "index.html";
 
-        console.error(
-            "Logout error:",
-            error
-        );
 
-        alert(
-            "Unable to logout:\n" +
-            error.message
-        );
-    }
-};
+            } catch (error) {
+
+                alert(
+                    firebaseErrorMessage(
+                        error
+                    )
+                );
+
+            }
+
+        }
+    );
 
 
 // =====================================================
@@ -2017,89 +2760,37 @@ onAuthStateChanged(
 
         if (!user) {
 
-            currentUser = null;
-
-            window.location.href =
+            location.href =
                 "index.html";
 
             return;
+
         }
 
 
-        currentUser = user;
+        currentUser =
+            user;
 
 
-        const email =
-            $("userEmail");
+        if ($("userMobile")) {
 
-        if (email) {
+            $("userMobile").textContent =
+                user.email ||
+                "Signed in";
 
-            email.textContent =
-                user.email || "";
         }
 
 
-        await loadReferrals();
+        await loadRecords();
 
     }
 );
 
 
 // =====================================================
-// INITIAL UI SETUP
+// INITIAL UI
 // =====================================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    () => {
+updateOtherDefectVisibility();
 
-        updateInstituteFields();
-
-        updateOtherDefectVisibility();
-
-        updateStatusFields();
-
-
-        // Close modal by clicking outside
-        document.addEventListener(
-            "click",
-            event => {
-
-                if (
-                    event.target.classList &&
-                    event.target.classList.contains("modal")
-                ) {
-
-                    event.target.classList.remove(
-                        "active"
-                    );
-                }
-            }
-        );
-
-
-        // Escape key closes active modal
-        document.addEventListener(
-            "keydown",
-            event => {
-
-                if (event.key !== "Escape") {
-                    return;
-                }
-
-                document
-                    .querySelectorAll(
-                        ".modal.active"
-                    )
-                    .forEach(
-                        modal => {
-                            modal.classList.remove(
-                                "active"
-                            );
-                        }
-                    );
-            }
-        );
-
-    }
-);
+toggleTreatment();
