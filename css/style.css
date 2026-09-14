@@ -2802,3 +2802,571 @@ textarea::placeholder {
         width: 100%;
     }
 }
+/* =========================================================
+   RBSK REFERRAL SYSTEM
+   STATUS HISTORY + TIMELINE + FINAL UI FIX
+   ========================================================= */
+
+/* ---------------------------------------------------------
+   STATUS FORM — FORCE CLEAN VERTICAL LAYOUT
+   --------------------------------------------------------- */
+
+#statusForm {
+    display: block !important;
+    width: 100%;
+}
+
+#statusForm > label,
+#statusForm > div {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#statusForm label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+#statusForm label > span {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Status Date */
+#statusDateWrap {
+    width: 100%;
+}
+
+#statusDate {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+    color: #111827;
+}
+
+/* Status Select */
+#newStatus {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   REFER TYPE
+   --------------------------------------------------------- */
+
+#referTypeWrap {
+    width: 100% !important;
+    margin-top: 4px;
+}
+
+#referType {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   PRIVATE HOSPITAL
+   --------------------------------------------------------- */
+
+#privateHospitalWrap,
+#otherHospitalWrap {
+    width: 100%;
+    margin-top: 4px;
+}
+
+#privateHospital,
+#otherHospitalName {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   TREATMENT FIELDS
+   --------------------------------------------------------- */
+
+#treatmentFields {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#treatmentFields label {
+    width: 100%;
+}
+
+#hospitalName,
+#estimatedExpenditure {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #fff;
+    font-size: 14px;
+}
+
+/* ---------------------------------------------------------
+   DEFECT / HEALTH CONDITION
+   COMPACT TWO-COLUMN DESIGN
+   --------------------------------------------------------- */
+
+#defectList {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    max-height: 270px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 5px;
+    box-sizing: border-box;
+    border: 1px solid #e5e7eb;
+    border-radius: 9px;
+    background: #f9fafb;
+}
+
+/* Individual defect */
+#defectList label {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 7px;
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    margin: 0 !important;
+    padding: 7px 9px;
+    box-sizing: border-box;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1.25;
+    color: #374151;
+}
+
+/* Checkbox */
+#defectList label input[type="checkbox"] {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex: 0 0 16px;
+    cursor: pointer;
+    accent-color: #2563eb;
+}
+
+/* Text inside defect labels */
+#defectList label span,
+#defectList label {
+    word-break: normal;
+}
+
+/* Selected defect */
+#defectList label:has(input[type="checkbox"]:checked) {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-weight: 600;
+}
+
+/* Scrollbar */
+#defectList::-webkit-scrollbar {
+    width: 6px;
+}
+
+#defectList::-webkit-scrollbar-track {
+    background: #f3f4f6;
+    border-radius: 10px;
+}
+
+#defectList::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+}
+
+/* ---------------------------------------------------------
+   OTHER HEALTH CONDITION
+   --------------------------------------------------------- */
+
+#otherDefectBox {
+    width: 100%;
+    margin-top: 8px;
+}
+
+#otherDefect {
+    width: 100%;
+    min-height: 42px;
+    box-sizing: border-box;
+    padding: 9px 11px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 13px;
+    resize: vertical;
+}
+
+/* ---------------------------------------------------------
+   STATUS HISTORY TIMELINE
+   --------------------------------------------------------- */
+
+.status-history-section {
+    margin-top: 18px;
+    padding: 16px;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.status-history-section h3 {
+    margin: 0 0 15px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.status-timeline {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+/* Timeline item */
+.status-timeline-item {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    min-height: 62px;
+}
+
+/* Vertical connecting line */
+.status-timeline-item:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 31px;
+    bottom: -1px;
+    width: 2px;
+    background: #dbeafe;
+}
+
+/* Icon */
+.status-timeline-icon {
+    position: relative;
+    z-index: 2;
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #f3f4f6;
+    border: 2px solid #d1d5db;
+    font-size: 14px;
+    font-weight: 700;
+    box-sizing: border-box;
+}
+
+/* Pending */
+.status-timeline-icon.pending {
+    background: #fff7ed;
+    border-color: #fdba74;
+    color: #ea580c;
+}
+
+/* Referred */
+.status-timeline-icon.referred {
+    background: #eff6ff;
+    border-color: #93c5fd;
+    color: #2563eb;
+}
+
+/* Treatment Started */
+.status-timeline-icon.treatment-started {
+    background: #f0fdf4;
+    border-color: #86efac;
+    color: #16a34a;
+}
+
+/* Completed */
+.status-timeline-icon.completed {
+    background: #ecfdf5;
+    border-color: #6ee7b7;
+    color: #059669;
+}
+
+/* Timeline body */
+.status-timeline-body {
+    flex: 1;
+    min-width: 0;
+    padding: 1px 0 17px 11px;
+}
+
+/* Top row */
+.status-timeline-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.status-timeline-top strong {
+    font-size: 13px;
+    font-weight: 700;
+    color: #111827;
+}
+
+.status-timeline-top span {
+    font-size: 11px;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+/* Additional details */
+.status-timeline-body small {
+    display: block;
+    margin-top: 4px;
+    font-size: 11px;
+    line-height: 1.4;
+    color: #6b7280;
+}
+
+/* ---------------------------------------------------------
+   CURRENT STATUS BADGE
+   --------------------------------------------------------- */
+
+.status-history-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 14px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------------
+   DETAILS MODAL
+   --------------------------------------------------------- */
+
+#detailsContent {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+#detailsContent .detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 9px 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+#detailsContent .detail-row:last-child {
+    border-bottom: none;
+}
+
+#detailsContent .detail-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+}
+
+#detailsContent .detail-value {
+    text-align: right;
+    font-size: 12px;
+    font-weight: 600;
+    color: #1e293b;
+    word-break: break-word;
+}
+
+/* ---------------------------------------------------------
+   PREMIUM REFERRAL CARD
+   --------------------------------------------------------- */
+
+.referral-card {
+    border-radius: 12px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    padding: 13px;
+    margin-bottom: 10px;
+    transition: 0.2s ease;
+}
+
+.referral-card:hover {
+    border-color: #bfdbfe;
+    box-shadow: 0 5px 16px rgba(15, 23, 42, 0.07);
+}
+
+/* ---------------------------------------------------------
+   STATUS BADGES
+   --------------------------------------------------------- */
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 25px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    line-height: 1;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-badge.pending {
+    background: #fff7ed;
+    color: #c2410c;
+}
+
+.status-badge.referred {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.status-badge.treatment-started {
+    background: #f0fdf4;
+    color: #15803d;
+}
+
+.status-badge.completed {
+    background: #ecfdf5;
+    color: #047857;
+}
+
+/* ---------------------------------------------------------
+   MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 620px) {
+
+    #defectList {
+        grid-template-columns: 1fr;
+        max-height: 310px;
+    }
+
+    #defectList label {
+        min-height: 38px;
+        padding: 7px 8px;
+        font-size: 12px;
+    }
+
+    .status-history-section {
+        padding: 13px;
+        margin-top: 14px;
+    }
+
+    .status-timeline-item {
+        min-height: 58px;
+    }
+
+    .status-timeline-item:not(:last-child)::before {
+        left: 14px;
+        top: 29px;
+    }
+
+    .status-timeline-icon {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 13px;
+    }
+
+    .status-timeline-body {
+        padding-left: 9px;
+        padding-bottom: 14px;
+    }
+
+    .status-timeline-top {
+        display: block;
+    }
+
+    .status-timeline-top strong {
+        display: block;
+        font-size: 12px;
+    }
+
+    .status-timeline-top span {
+        display: block;
+        margin-top: 3px;
+        font-size: 10px;
+    }
+
+    #detailsContent .detail-row {
+        display: block;
+    }
+
+    #detailsContent .detail-value {
+        margin-top: 3px;
+        text-align: left;
+    }
+}
+
+/* ---------------------------------------------------------
+   VERY SMALL MOBILE
+   --------------------------------------------------------- */
+
+@media (max-width: 380px) {
+
+    #defectList {
+        gap: 6px;
+        padding: 4px;
+    }
+
+    #defectList label {
+        font-size: 11px;
+        padding: 6px 7px;
+    }
+
+    #defectList label input[type="checkbox"] {
+        width: 15px !important;
+        height: 15px !important;
+        min-width: 15px !important;
+        min-height: 15px !important;
+        flex-basis: 15px;
+    }
+
+    .status-history-section {
+        padding: 11px;
+    }
+}
