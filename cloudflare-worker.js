@@ -51,11 +51,9 @@ const ALLOWED_TYPES = [
 // ============================================================
 
 const ALLOWED_ORIGINS = [
+    "https://refermanagement.vercel.app",
     "http://localhost:5500",
-    "http://127.0.0.1:5500",
-
-    // Example:
-    // "https://yourdomain.com"
+    "http://127.0.0.1:5500"
 ];
 
 
@@ -392,7 +390,7 @@ async function createAuthenticatedUrl(
     const signature =
         await createDeliverySignature(
             deliveryPath,
-            env.CLOUDINARY_API_SECRET
+            env.7PNse0VxICQn_seWHLG5mapbxCc
         );
 
 
