@@ -8,9 +8,9 @@
 <link rel="stylesheet" href="css/style.css">
 
 <style>
-/* ================================
+/* =========================
    DEFECT LIST
-================================ */
+========================= */
 .defect-list{
     display:grid;
     grid-template-columns:1fr 1fr;
@@ -50,88 +50,107 @@
 }
 
 
-/* ================================
-   CLOUDINARY FILE UPLOAD
-================================ */
-.file-upload-section{
-    grid-column:1/-1;
+/* =========================
+   UPLOAD SECTION
+========================= */
+.upload-section{
+    grid-column:1 / -1;
     margin-top:4px;
     padding:14px;
-    border:1px solid #dfe5ee;
-    border-radius:14px;
+    border:1px solid #e3e8f0;
+    border-radius:12px;
     background:#f8fafc;
 }
 
-.file-upload-section h4{
+.upload-section-title{
     margin:0 0 4px;
-    font-size:14px;
+    font-size:15px;
+    font-weight:700;
     color:#1f2937;
 }
 
-.file-upload-section .upload-help{
-    margin:0 0 12px;
-    font-size:11px;
+.upload-section-subtitle{
+    margin:0 0 14px;
+    font-size:12px;
     color:#6b7280;
-    line-height:1.45;
 }
 
-.file-upload-grid{
+.upload-grid{
     display:grid;
     grid-template-columns:1fr 1fr;
     gap:12px;
 }
 
-.file-upload-box{
+.upload-box{
     background:#fff;
-    border:1px solid #e4e9f0;
-    border-radius:11px;
+    border:1px solid #dfe5ee;
+    border-radius:10px;
     padding:12px;
 }
 
-.file-upload-box label{
+.upload-box label{
     display:block;
-    font-size:12px;
-    font-weight:600;
-    color:#374151;
-    margin-bottom:7px;
+    margin:0;
 }
 
-.file-upload-box input[type="file"]{
+.upload-label{
+    display:block;
+    margin-bottom:7px;
+    font-size:13px;
+    font-weight:700;
+    color:#374151;
+}
+
+.upload-help{
+    display:block;
+    margin-top:6px;
+    font-size:11px;
+    line-height:1.4;
+    color:#6b7280;
+}
+
+.upload-box input[type="file"]{
     width:100%;
     box-sizing:border-box;
     padding:8px;
     border:1px dashed #cbd5e1;
     border-radius:8px;
     background:#f8fafc;
-    font-size:11px;
+    font-size:12px;
+    cursor:pointer;
 }
 
-.file-upload-box small{
-    display:block;
-    margin-top:6px;
-    font-size:10px;
-    color:#6b7280;
-    line-height:1.35;
-}
-
-.selected-files{
+.file-list{
     margin-top:8px;
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.file-item{
+    display:flex;
+    align-items:center;
+    gap:7px;
+    padding:6px 8px;
+    border-radius:7px;
+    background:#f1f5f9;
+    border:1px solid #e2e8f0;
     font-size:11px;
     color:#374151;
-    line-height:1.5;
     word-break:break-word;
 }
 
-.selected-files:empty{
-    display:none;
+.file-item-icon{
+    flex:0 0 auto;
+    font-size:13px;
 }
 
 .upload-status{
     display:none;
-    margin-top:10px;
-    padding:9px 10px;
+    margin-top:12px;
+    padding:9px 11px;
     border-radius:8px;
-    font-size:11px;
+    font-size:12px;
     line-height:1.4;
 }
 
@@ -139,26 +158,40 @@
     display:block;
 }
 
+.upload-status.success{
+    background:#ecfdf5;
+    border:1px solid #a7f3d0;
+    color:#065f46;
+}
 
-/* ================================
+.upload-status.error{
+    background:#fef2f2;
+    border:1px solid #fecaca;
+    color:#991b1b;
+}
+
+.upload-status.info{
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    color:#1e40af;
+}
+
+
+/* =========================
    MOBILE
-================================ */
+========================= */
 @media(max-width:600px){
 
     .defect-list{
         grid-template-columns:1fr;
     }
 
-    .file-upload-grid{
+    .upload-grid{
         grid-template-columns:1fr;
     }
 
-    .file-upload-section{
+    .upload-section{
         padding:11px;
-    }
-
-    .file-upload-box{
-        padding:10px;
     }
 }
 </style>
@@ -168,971 +201,1062 @@
 
 <div class="app">
 
-<header class="topbar">
+    <!-- =========================
+         TOP BAR
+    ========================== -->
+    <header class="topbar">
 
-    <div class="brand">
-        <div class="logo">R</div>
+        <div class="brand">
+            <div class="logo">R</div>
+
+            <div>
+                <h1>Shree RBSK</h1>
+                <p>Referral Management System</p>
+            </div>
+        </div>
+
+        <div class="top-actions">
+            <span id="userMobile" class="user-pill">Loading...</span>
+
+            <button
+                type="button"
+                id="logout"
+                class="btn light small">
+                Logout
+            </button>
+        </div>
+
+    </header>
+
+
+    <!-- =========================
+         HERO
+    ========================== -->
+    <section class="hero">
 
         <div>
-            <h1>Shree RBSK</h1>
-            <p>Referral Management System</p>
+            <h2>Referral Dashboard</h2>
+            <p>Manage referred children and treatment follow-up.</p>
         </div>
-    </div>
 
-    <div class="top-actions">
-        <span id="userMobile" class="user-pill">Loading...</span>
-        <button type="button" id="logout" class="btn light small">
-            Logout
+        <button
+            type="button"
+            id="newReferral"
+            class="btn white">
+            ＋ New Referral
         </button>
-    </div>
 
-</header>
-
-
-<section class="hero">
-
-    <div>
-        <h2>Referral Dashboard</h2>
-        <p>Manage referred children and treatment follow-up.</p>
-    </div>
-
-    <button type="button" id="newReferral" class="btn white">
-        ＋ New Referral
-    </button>
-
-</section>
+    </section>
 
 
-<section class="stats">
+    <!-- =========================
+         STATS
+    ========================== -->
+    <section class="stats">
 
-    <div class="stat">
-        <span>📋</span>
-        <b id="total">0</b>
-        <small>Total Referrals</small>
-    </div>
-
-    <div class="stat">
-        <span>⏳</span>
-        <b id="pending">0</b>
-        <small>Pending</small>
-    </div>
-
-    <div class="stat">
-        <span>📤</span>
-        <b id="referred">0</b>
-        <small>Referred</small>
-    </div>
-
-    <div class="stat">
-        <span>🏥</span>
-        <b id="started">0</b>
-        <small>Treatment Started</small>
-    </div>
-
-    <div class="stat">
-        <span>✓</span>
-        <b id="completed">0</b>
-        <small>Completed</small>
-    </div>
-
-</section>
-
-
-<section class="panel">
-
-    <div class="section-head">
-
-        <div>
-            <h3>Referral Records</h3>
+        <div class="stat">
+            <span>📋</span>
+            <b id="total">0</b>
+            <small>Total Referrals</small>
         </div>
 
-        <div class="filters">
+        <div class="stat">
+            <span>⏳</span>
+            <b id="pending">0</b>
+            <small>Pending</small>
+        </div>
 
-            <input
-                type="search"
-                id="search"
-                placeholder="Search child, institute, problem..."
-                autocomplete="off"
-            >
+        <div class="stat">
+            <span>📤</span>
+            <b id="referred">0</b>
+            <small>Referred</small>
+        </div>
 
-            <select id="statusFilter">
-                <option value="">All Status</option>
-                <option>Pending</option>
-                <option>Referred</option>
-                <option>Treatment Started</option>
-                <option>Completed</option>
-            </select>
+        <div class="stat">
+            <span>🏥</span>
+            <b id="started">0</b>
+            <small>Treatment Started</small>
+        </div>
 
-            <select id="typeFilter">
-                <option value="">All Institutes</option>
-                <option>School</option>
-                <option>AWC</option>
-            </select>
+        <div class="stat">
+            <span>✓</span>
+            <b id="completed">0</b>
+            <small>Completed</small>
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         REFERRAL RECORDS
+    ========================== -->
+    <section class="panel">
+
+        <div class="section-head">
+
+            <div>
+                <h3>Referral Records</h3>
+            </div>
+
+            <div class="filters">
+
+                <input
+                    type="search"
+                    id="search"
+                    placeholder="Search child, institute, problem..."
+                    autocomplete="off">
+
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option>Pending</option>
+                    <option>Referred</option>
+                    <option>Treatment Started</option>
+                    <option>Completed</option>
+                </select>
+
+                <select id="typeFilter">
+                    <option value="">All Institutes</option>
+                    <option>School</option>
+                    <option>AWC</option>
+                </select>
+
+            </div>
 
         </div>
 
-    </div>
+        <div id="records" class="records"></div>
 
-    <div id="records" class="records"></div>
-
-</section>
+    </section>
 
 </div>
 
 
 
-<!-- ==========================================
+<!-- =========================================================
      NEW / EDIT REFERRAL MODAL
-========================================== -->
-
-<div id="referralModal" class="modal" aria-hidden="true">
-
-<div class="modal-card large">
-
-<div class="modal-head">
-
-    <h3 id="referralModalTitle">New Referral</h3>
-
-    <button
-        type="button"
-        class="close"
-        data-close="referralModal"
-    >
-        ×
-    </button>
-
-</div>
-
-
-<form id="referralForm">
-
-<div class="form-grid">
-
-
-<!-- CHILD DETAILS -->
-
-<label>
-    Child Name *
-    <input
-        type="text"
-        id="childName"
-        required
-    >
-</label>
-
-
-<label>
-    Sex *
-    <select id="sex" required>
-        <option value="">Select</option>
-        <option>Male</option>
-        <option>Female</option>
-        <option>Other</option>
-    </select>
-</label>
-
-
-<label>
-    Date of Birth *
-    <input
-        type="date"
-        id="dob"
-        required
-    >
-</label>
-
-
-<label>
-    Birth Certificate Number
-    <input
-        type="text"
-        id="birthCertificateNo"
-    >
-</label>
-
-
-<label>
-    Father Name
-    <input
-        type="text"
-        id="fatherName"
-    >
-</label>
-
-
-<label>
-    Father Aadhaar Number
-    <input
-        type="text"
-        id="fatherAadhaar"
-        maxlength="12"
-        inputmode="numeric"
-    >
-</label>
-
-
-<label>
-    Mother Name
-    <input
-        type="text"
-        id="motherName"
-    >
-</label>
-
-
-<label>
-    Mother Aadhaar Number
-    <input
-        type="text"
-        id="motherAadhaar"
-        maxlength="12"
-        inputmode="numeric"
-    >
-</label>
-
-
-<label>
-    Village Name
-    <input
-        type="text"
-        id="villageName"
-    >
-</label>
-
-
-<label>
-    Weight (kg)
-    <input
-        type="number"
-        id="weight"
-        min="0"
-        step="0.1"
-    >
-</label>
-
-
-<label>
-    Height (cm)
-    <input
-        type="number"
-        id="height"
-        min="0"
-        step="0.1"
-    >
-</label>
-
-
-
-<!-- DEFECT / HEALTH CONDITION -->
-
-<label class="full">
-
-    Defect / Health Condition *
-
-    <div
-        class="defect-list"
-        id="defectList"
-    >
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="1 - Neural Tube Defect"
-            >
-            <span>1 - Neural Tube Defect</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="2 - Downs Syndrome"
-            >
-            <span>2 - Downs Syndrome</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="3 - Cleft Lip and Palate"
-            >
-            <span>3 - Cleft Lip and Palate</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="4 - Talipes (club foot)"
-            >
-            <span>4 - Talipes (club foot)</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="5 - Developmental Dysplasia of Hip"
-            >
-            <span>5 - Developmental Dysplasia of Hip</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="6 - Congenital Cataract"
-            >
-            <span>6 - Congenital Cataract</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="7 - Congenital Deafness"
-            >
-            <span>7 - Congenital Deafness</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="8 - Congenital Heart Disease"
-            >
-            <span>8 - Congenital Heart Disease</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="9 - Retinopathy of Prematurity (only at DH)"
-            >
-            <span>
-                9 - Retinopathy of Prematurity (only at DH)
-            </span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="47 - Congenital Ear Problems"
-            >
-            <span>47 - Congenital Ear Problems</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="48 - Neck and Face Defects"
-            >
-            <span>48 - Neck and Face Defects</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                value="50 - Congenital Eye Problems"
-            >
-            <span>50 - Congenital Eye Problems</span>
-        </label>
-
-        <label class="defect-item">
-            <input
-                type="checkbox"
-                id="otherDefectCheckbox"
-                value="Other Health Condition"
-            >
-            <span>Other Health Condition</span>
-        </label>
-
-    </div>
-
-
-    <div
-        id="otherDefectBox"
-        class="other-box hidden"
-    >
-        <input
-            type="text"
-            id="otherDefect"
-            maxlength="200"
-            placeholder="Enter other defect / health condition"
-        >
-    </div>
-
-</label>
-
-
-
-<!-- INSTITUTE -->
-
-<label>
-    Institute Type *
-
-    <select
-        id="instituteType"
-        required
-    >
-        <option value="">Select</option>
-        <option>School</option>
-        <option>AWC</option>
-    </select>
-
-</label>
-
-
-<label>
-    Institute Name *
-
-    <input
-        type="text"
-        id="instituteName"
-        required
-    >
-
-</label>
-
-
-<label
-    id="classWrap"
-    hidden
->
-    Class
-
-    <select id="className">
-
-        <option value="">Select Class</option>
-
-        <option value="1">1</option>
-        <option value="2">2</option>
-        <option value="3">3</option>
-        <option value="4">4</option>
-        <option value="5">5</option>
-        <option value="6">6</option>
-        <option value="7">7</option>
-        <option value="8">8</option>
-        <option value="9">9</option>
-        <option value="10">10</option>
-        <option value="11">11</option>
-        <option value="12">12</option>
-
-    </select>
-
-</label>
-
-
-<label
-    id="awcWrap"
-    hidden
->
-    AWC Worker Number
-
-    <input
-        type="text"
-        id="awcWorkerNumber"
-    >
-
-</label>
-
-
-<!-- MOBILE NUMBERS -->
-
-<label>
-    Mobile 1
-    <input
-        type="tel"
-        id="mobile1"
-        maxlength="10"
-        inputmode="numeric"
-    >
-</label>
-
-
-<label>
-    Mobile 2
-    <input
-        type="tel"
-        id="mobile2"
-        maxlength="10"
-        inputmode="numeric"
-    >
-</label>
-
-
-<label class="full">
-
-    <span id="mobile3Label">
-        Mobile 3
-    </span>
-
-    <input
-        type="tel"
-        id="mobile3"
-        maxlength="10"
-        inputmode="numeric"
-    >
-
-</label>
-
-
-
-<!-- ==========================================
-     CLOUDINARY FILE UPLOAD
-========================================== -->
-
-<div class="file-upload-section">
-
-    <h4>📁 Documents & Photo</h4>
-
-    <p class="upload-help">
-        Upload child photo and referral-related documents.
-        Maximum 10 MB per file. PDF, JPG, PNG and WEBP supported.
-    </p>
-
-
-    <div class="file-upload-grid">
-
-
-        <!-- CHILD PHOTO -->
-
-        <div class="file-upload-box">
-
-            <label for="childPhoto">
-                📷 Child Photo
-            </label>
-
-            <input
-                type="file"
-                id="childPhoto"
-                accept="image/jpeg,image/png,image/webp"
-            >
-
-            <small>
-                JPG, PNG or WEBP • Maximum 10 MB
-            </small>
-
-            <div
-                id="childPhotoSelected"
-                class="selected-files"
-            ></div>
+========================================================= -->
+
+<div
+    id="referralModal"
+    class="modal"
+    aria-hidden="true">
+
+    <div class="modal-card large">
+
+        <div class="modal-head">
+
+            <h3 id="referralModalTitle">
+                New Referral
+            </h3>
+
+            <button
+                type="button"
+                class="close"
+                data-close="referralModal">
+                ×
+            </button>
 
         </div>
 
 
+        <form id="referralForm">
 
-        <!-- DOCUMENTS -->
+            <div class="form-grid">
 
-        <div class="file-upload-box">
 
-            <label for="referralDocuments">
-                📄 Referral Documents
-            </label>
+                <!-- =========================
+                     CHILD DETAILS
+                ========================== -->
 
-            <input
-                type="file"
-                id="referralDocuments"
-                accept="application/pdf,image/jpeg,image/png,image/webp"
-                multiple
-            >
+                <label>
+                    Child Name *
+                    <input
+                        type="text"
+                        id="childName"
+                        required>
+                </label>
 
-            <small>
-                PDF, JPG, PNG or WEBP • Maximum 10 MB each
-            </small>
 
-            <div
-                id="referralDocumentsSelected"
-                class="selected-files"
-            ></div>
+                <label>
+                    Sex *
 
-        </div>
+                    <select id="sex" required>
+
+                        <option value="">
+                            Select
+                        </option>
+
+                        <option>
+                            Male
+                        </option>
+
+                        <option>
+                            Female
+                        </option>
+
+                        <option>
+                            Other
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+                    Date of Birth *
+
+                    <input
+                        type="date"
+                        id="dob"
+                        required>
+                </label>
+
+
+                <label>
+                    Birth Certificate Number
+
+                    <input
+                        type="text"
+                        id="birthCertificateNo">
+                </label>
+
+
+                <label>
+                    Father Name
+
+                    <input
+                        type="text"
+                        id="fatherName">
+                </label>
+
+
+                <label>
+                    Father Aadhaar Number
+
+                    <input
+                        type="text"
+                        id="fatherAadhaar"
+                        maxlength="12"
+                        inputmode="numeric">
+                </label>
+
+
+                <label>
+                    Mother Name
+
+                    <input
+                        type="text"
+                        id="motherName">
+                </label>
+
+
+                <label>
+                    Mother Aadhaar Number
+
+                    <input
+                        type="text"
+                        id="motherAadhaar"
+                        maxlength="12"
+                        inputmode="numeric">
+                </label>
+
+
+                <label>
+                    Village Name
+
+                    <input
+                        type="text"
+                        id="villageName">
+                </label>
+
+
+                <label>
+                    Weight (kg)
+
+                    <input
+                        type="number"
+                        id="weight"
+                        min="0"
+                        step="0.1">
+                </label>
+
+
+                <label>
+                    Height (cm)
+
+                    <input
+                        type="number"
+                        id="height"
+                        min="0"
+                        step="0.1">
+                </label>
+
+
+
+                <!-- =========================
+                     DEFECT / HEALTH CONDITION
+                ========================== -->
+
+                <label class="full">
+
+                    Defect / Health Condition *
+
+                    <div
+                        class="defect-list"
+                        id="defectList">
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="1 - Neural Tube Defect">
+                            <span>
+                                1 - Neural Tube Defect
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="2 - Downs Syndrome">
+                            <span>
+                                2 - Downs Syndrome
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="3 - Cleft Lip and Palate">
+                            <span>
+                                3 - Cleft Lip and Palate
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="4 - Talipes (club foot)">
+                            <span>
+                                4 - Talipes (club foot)
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="5 - Developmental Dysplasia of Hip">
+                            <span>
+                                5 - Developmental Dysplasia of Hip
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="6 - Congenital Cataract">
+                            <span>
+                                6 - Congenital Cataract
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="7 - Congenital Deafness">
+                            <span>
+                                7 - Congenital Deafness
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="8 - Congenital Heart Disease">
+                            <span>
+                                8 - Congenital Heart Disease
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="9 - Retinopathy of Prematurity (only at DH)">
+                            <span>
+                                9 - Retinopathy of Prematurity (only at DH)
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="47 - Congenital Ear Problems">
+                            <span>
+                                47 - Congenital Ear Problems
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="48 - Neck and Face Defects">
+                            <span>
+                                48 - Neck and Face Defects
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+                            <input
+                                type="checkbox"
+                                value="50 - Congenital Eye Problems">
+                            <span>
+                                50 - Congenital Eye Problems
+                            </span>
+                        </label>
+
+
+                        <label class="defect-item">
+
+                            <input
+                                type="checkbox"
+                                id="otherDefectCheckbox"
+                                value="Other Health Condition">
+
+                            <span>
+                                Other Health Condition
+                            </span>
+
+                        </label>
+
+                    </div>
+
+
+                    <div
+                        id="otherDefectBox"
+                        class="other-box hidden">
+
+                        <input
+                            type="text"
+                            id="otherDefect"
+                            maxlength="200"
+                            placeholder="Enter other defect / health condition">
+
+                    </div>
+
+                </label>
+
+
+
+                <!-- =========================
+                     INSTITUTE
+                ========================== -->
+
+                <label>
+
+                    Institute Type *
+
+                    <select
+                        id="instituteType"
+                        required>
+
+                        <option value="">
+                            Select
+                        </option>
+
+                        <option>
+                            School
+                        </option>
+
+                        <option>
+                            AWC
+                        </option>
+
+                    </select>
+
+                </label>
+
+
+                <label>
+
+                    Institute Name *
+
+                    <input
+                        type="text"
+                        id="instituteName"
+                        required>
+
+                </label>
+
+
+                <label
+                    id="classWrap"
+                    hidden>
+
+                    Class
+
+                    <select id="className">
+
+                        <option value="">
+                            Select Class
+                        </option>
+
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                        <option value="9">9</option>
+                        <option value="10">10</option>
+                        <option value="11">11</option>
+                        <option value="12">12</option>
+
+                    </select>
+
+                </label>
+
+
+                <label
+                    id="awcWrap"
+                    hidden>
+
+                    AWC Worker Number
+
+                    <input
+                        type="text"
+                        id="awcWorkerNumber">
+
+                </label>
+
+
+
+                <!-- =========================
+                     MOBILE NUMBERS
+                ========================== -->
+
+                <label>
+
+                    Mobile 1
+
+                    <input
+                        type="tel"
+                        id="mobile1"
+                        maxlength="10"
+                        inputmode="numeric">
+
+                </label>
+
+
+                <label>
+
+                    Mobile 2
+
+                    <input
+                        type="tel"
+                        id="mobile2"
+                        maxlength="10"
+                        inputmode="numeric">
+
+                </label>
+
+
+                <label class="full">
+
+                    <span id="mobile3Label">
+                        Mobile 3
+                    </span>
+
+                    <input
+                        type="tel"
+                        id="mobile3"
+                        maxlength="10"
+                        inputmode="numeric">
+
+                </label>
+
+
+
+                <!-- =================================================
+                     FILE UPLOAD SECTION
+                ================================================== -->
+
+                <div class="upload-section">
+
+                    <h4 class="upload-section-title">
+                        📎 Child Photo & Referral Documents
+                    </h4>
+
+                    <p class="upload-section-subtitle">
+                        Upload only required documents. Maximum size:
+                        10 MB per file.
+                    </p>
+
+
+                    <div class="upload-grid">
+
+
+                        <!-- =========================
+                             CHILD PHOTO
+                        ========================== -->
+
+                        <div class="upload-box">
+
+                            <label>
+
+                                <span class="upload-label">
+                                    📷 Child Photo
+                                </span>
+
+                                <input
+                                    type="file"
+                                    id="childPhoto"
+                                    accept="image/jpeg,image/png,image/webp">
+
+                                <span class="upload-help">
+                                    JPG, PNG or WEBP only.
+                                    Maximum 10 MB.
+                                </span>
+
+                            </label>
+
+
+                            <div
+                                id="childPhotoSelected"
+                                class="file-list">
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- =========================
+                             DOCUMENTS
+                        ========================== -->
+
+                        <div class="upload-box">
+
+                            <label>
+
+                                <span class="upload-label">
+                                    📄 Referral Documents
+                                </span>
+
+                                <input
+                                    type="file"
+                                    id="referralDocuments"
+                                    multiple
+                                    accept="application/pdf,image/jpeg,image/png,image/webp">
+
+                                <span class="upload-help">
+                                    PDF, JPG, PNG or WEBP.
+                                    Multiple files allowed.
+                                    Maximum 10 MB each.
+                                </span>
+
+                            </label>
+
+
+                            <div
+                                id="referralDocumentsSelected"
+                                class="file-list">
+                            </div>
+
+                        </div>
+
+                    </div>
+
+
+                    <!-- UPLOAD STATUS -->
+
+                    <div
+                        id="uploadStatus"
+                        class="upload-status">
+                    </div>
+
+                </div>
+
+
+            </div>
+
+
+            <!-- =========================
+                 FORM ACTIONS
+            ========================== -->
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn light"
+                    data-close="referralModal">
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    id="saveReferralButton"
+                    class="btn primary">
+                    Save Referral
+                </button>
+
+            </div>
+
+        </form>
 
     </div>
 
-
-    <div
-        id="uploadStatus"
-        class="upload-status"
-    ></div>
-
-</div>
-
-
-</div>
-
-
-<!-- FORM ACTIONS -->
-
-<div class="modal-actions">
-
-    <button
-        type="button"
-        class="btn light"
-        data-close="referralModal"
-    >
-        Cancel
-    </button>
-
-    <button
-        type="submit"
-        id="saveReferralButton"
-        class="btn primary"
-    >
-        Save Referral
-    </button>
-
-</div>
-
-</form>
-
-</div>
-
 </div>
 
 
 
-<!-- ==========================================
+<!-- =========================================================
      STATUS MODAL
-========================================== -->
+========================================================= -->
 
 <div
     id="statusModal"
     class="modal"
-    aria-hidden="true"
->
+    aria-hidden="true">
 
-<div class="modal-card">
+    <div class="modal-card">
 
-<div class="modal-head">
+        <div class="modal-head">
 
-    <h3>Update Status</h3>
+            <h3>
+                Update Status
+            </h3>
 
-    <button
-        type="button"
-        class="close"
-        data-close="statusModal"
-    >
-        ×
-    </button>
+            <button
+                type="button"
+                class="close"
+                data-close="statusModal">
+                ×
+            </button>
 
-</div>
-
-
-<form id="statusForm">
+        </div>
 
 
-<label>
-
-    Status
-
-    <select id="newStatus">
-
-        <option>Pending</option>
-        <option>Referred</option>
-        <option>Treatment Started</option>
-        <option>Completed</option>
-
-    </select>
-
-</label>
+        <form id="statusForm">
 
 
-<label id="statusDateWrap">
+            <label>
 
-    Status Date
+                Status
 
-    <input
-        type="date"
-        id="statusDate"
-        name="statusDate"
-        required
-    >
+                <select id="newStatus">
 
-</label>
+                    <option>
+                        Pending
+                    </option>
 
+                    <option>
+                        Referred
+                    </option>
 
-<label id="referTypeWrap">
+                    <option>
+                        Treatment Started
+                    </option>
 
-    Refer Type
+                    <option>
+                        Completed
+                    </option>
 
-    <select id="referType">
+                </select>
 
-        <option value="">
-            Select
-        </option>
-
-        <option value="DEIC">
-            Refer to DEIC
-        </option>
-
-        <option value="Private Hospital">
-            Refer to Private Hospital
-        </option>
-
-    </select>
-
-</label>
+            </label>
 
 
-<div
-    id="privateHospitalWrap"
-    hidden
->
+            <label id="referTypeWrap">
 
-    <label>
+                Refer Type
 
-        Private Hospital
+                <select id="referType">
 
-        <select id="privateHospital">
+                    <option value="">
+                        Select
+                    </option>
 
-            <option value="">
-                Select Hospital
-            </option>
+                    <option value="DEIC">
+                        Refer to DEIC
+                    </option>
 
-            <option>
-                Arvindo Hospital
-            </option>
+                    <option value="Private Hospital">
+                        Refer to Private Hospital
+                    </option>
 
-            <option>
-                Bhandari Hospital
-            </option>
+                </select>
 
-            <option>
-                Medanta Hospital
-            </option>
-
-            <option value="Other">
-                Other
-            </option>
-
-        </select>
-
-    </label>
+            </label>
 
 
-    <label
-        id="otherHospitalWrap"
-        hidden
-    >
+            <div
+                id="privateHospitalWrap"
+                hidden>
 
-        Other Hospital Name
+                <label>
 
-        <input
-            id="otherHospitalName"
-            type="text"
-        >
+                    Private Hospital
 
-    </label>
+                    <select id="privateHospital">
 
-</div>
+                        <option value="">
+                            Select Hospital
+                        </option>
 
+                        <option>
+                            Arvindo Hospital
+                        </option>
 
-<div
-    id="treatmentFields"
-    class="treatment-fields"
->
+                        <option>
+                            Bhandari Hospital
+                        </option>
 
-    <label>
+                        <option>
+                            Medanta Hospital
+                        </option>
 
-        Hospital Name
+                        <option value="Other">
+                            Other
+                        </option>
 
-        <input
-            type="text"
-            id="hospitalName"
-        >
+                    </select>
 
-    </label>
-
-
-    <label>
-
-        Estimated Treatment Expenditure (₹)
-
-        <input
-            type="number"
-            id="estimatedExpenditure"
-            min="0"
-            step="1"
-        >
-
-    </label>
-
-</div>
+                </label>
 
 
-<div class="modal-actions">
+                <label
+                    id="otherHospitalWrap"
+                    hidden>
 
-    <button
-        type="button"
-        class="btn light"
-        data-close="statusModal"
-    >
-        Cancel
-    </button>
+                    Other Hospital Name
 
-    <button
-        type="submit"
-        class="btn primary"
-    >
-        Update
-    </button>
+                    <input
+                        id="otherHospitalName"
+                        type="text">
+
+                </label>
+
+            </div>
+
+
+            <div
+                id="treatmentFields"
+                class="treatment-fields">
+
+                <label>
+
+                    Hospital Name
+
+                    <input
+                        type="text"
+                        id="hospitalName">
+
+                </label>
+
+
+                <label>
+
+                    Estimated Treatment Expenditure (₹)
+
+                    <input
+                        type="number"
+                        id="estimatedExpenditure"
+                        min="0"
+                        step="1">
+
+                </label>
+
+            </div>
+
+
+            <div class="modal-actions">
+
+                <button
+                    type="button"
+                    class="btn light"
+                    data-close="statusModal">
+                    Cancel
+                </button>
+
+                <button
+                    type="submit"
+                    class="btn primary">
+                    Update
+                </button>
+
+            </div>
+
+        </form>
+
+    </div>
 
 </div>
 
-</form>
-
-</div>
-
-</div>
 
 
-
-<!-- ==========================================
+<!-- =========================================================
      DETAILS MODAL
-========================================== -->
+========================================================= -->
 
 <div
     id="detailsModal"
     class="modal"
-    aria-hidden="true"
->
+    aria-hidden="true">
 
-<div class="modal-card large">
+    <div class="modal-card large">
 
-<div class="modal-head">
+        <div class="modal-head">
 
-    <div>
+            <div>
 
-        <h3>
-            Referral Details
-        </h3>
+                <h3>
+                    Referral Details
+                </h3>
 
-        <p
-            id="detailsSubtitle"
-            class="muted"
-        >
-            Complete child referral information
-        </p>
+                <p
+                    id="detailsSubtitle"
+                    class="muted">
+                    Complete child referral information
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="close"
+                data-close="detailsModal">
+                ×
+            </button>
+
+        </div>
+
+
+        <div
+            id="detailsContent"
+            class="details-content">
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                type="button"
+                class="btn light"
+                data-close="detailsModal">
+                Close
+            </button>
+
+            <button
+                type="button"
+                id="detailsEdit"
+                class="btn primary">
+                Edit Referral
+            </button>
+
+        </div>
 
     </div>
 
-    <button
-        type="button"
-        class="close"
-        data-close="detailsModal"
-    >
-        ×
-    </button>
-
-</div>
-
-
-<div
-    id="detailsContent"
-    class="details-content"
-></div>
-
-
-<div class="modal-actions">
-
-    <button
-        type="button"
-        class="btn light"
-        data-close="detailsModal"
-    >
-        Close
-    </button>
-
-    <button
-        type="button"
-        id="detailsEdit"
-        class="btn primary"
-    >
-        Edit Referral
-    </button>
-
-</div>
-
-</div>
-
 </div>
 
 
 
-<!-- ==========================================
+<!-- =========================================================
      DELETE MODAL
-========================================== -->
+========================================================= -->
 
 <div
     id="deleteModal"
     class="modal"
-    aria-hidden="true"
->
+    aria-hidden="true">
 
-<div class="modal-card delete-card">
+    <div class="modal-card delete-card">
 
-<div class="modal-head">
+        <div class="modal-head">
 
-    <h3>
-        Delete Referral
-    </h3>
+            <h3>
+                Delete Referral
+            </h3>
 
-    <button
-        type="button"
-        class="close"
-        data-close="deleteModal"
-    >
-        ×
-    </button>
+            <button
+                type="button"
+                class="close"
+                data-close="deleteModal">
+                ×
+            </button>
 
-</div>
+        </div>
 
 
-<div class="delete-warning">
+        <div class="delete-warning">
 
-    <div class="delete-icon">
-        !
+            <div class="delete-icon">
+                !
+            </div>
+
+            <h4>
+                Are you sure?
+            </h4>
+
+            <p>
+                You are about to permanently delete
+                this referral record.
+            </p>
+
+            <strong id="deleteChildName">
+                -
+            </strong>
+
+        </div>
+
+
+        <div class="modal-actions">
+
+            <button
+                type="button"
+                class="btn light"
+                data-close="deleteModal">
+                Cancel
+            </button>
+
+            <button
+                type="button"
+                id="confirmDelete"
+                class="btn danger">
+                Delete Referral
+            </button>
+
+        </div>
+
     </div>
 
-    <h4>
-        Are you sure?
-    </h4>
-
-    <p>
-        You are about to permanently delete this referral record.
-    </p>
-
-    <strong id="deleteChildName">
-        -
-    </strong>
-
 </div>
 
 
-<div class="modal-actions">
 
-    <button
-        type="button"
-        class="btn light"
-        data-close="deleteModal"
-    >
-        Cancel
-    </button>
-
-    <button
-        type="button"
-        id="confirmDelete"
-        class="btn danger"
-    >
-        Delete Referral
-    </button>
-
-</div>
-
-</div>
-
-</div>
-
+<!-- =========================
+     DASHBOARD JS
+========================= -->
 
 <script
     type="module"
-    src="js/dashboard.js"
-></script>
+    src="js/dashboard.js">
+</script>
 
 </body>
 </html>
