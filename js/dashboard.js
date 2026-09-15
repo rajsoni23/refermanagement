@@ -46,6 +46,9 @@ const CLOUDINARY_UPLOAD_URL =
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
+const MAX_FILE_SIZE =
+    10 * 1024 * 1024;
+
 const ALLOWED_TYPES = [
     "application/pdf",
     "image/jpeg",
@@ -911,16 +914,60 @@ function validateFile(
 // CLOUDINARY UPLOAD
 // ============================================================
 
+// ============================================================
+// SECURE CLOUDINARY UPLOAD THROUGH WORKER
+// ============================================================
+
 async function cloudinaryUpload(
     file,
     folder,
     type
 ) {
-
     validateFile(
         file,
         type === "child_photo"
     );
+
+    if (!currentUser) {
+        throw new Error(
+            "Your session has expired. Please login again."
+        );
+    }
+
+    /*
+     * IMPORTANT:
+     * Cloudinary API Key / API Secret are NOT kept
+     * inside this browser-side JavaScript.
+     *
+     * Browser
+     *   ↓ Firebase ID Token
+     * Worker
+     *   ↓ Cloudinary API credentials
+     * Cloudinary
+     */
+
+    const WORKER_UPLOAD_URL =
+        "https://refermanagement.vercel.app/cloudflare-worker.js/upload";
+
+    const firebaseToken =
+        await currentUser.getIdToken();
+
+    /*
+     * Extract referral ID from:
+     *
+     * rbsk/{uid}/{referralId}
+     */
+    const referralId =
+        String(folder || "")
+            .split("/")
+            .filter(Boolean)
+            .pop() || "";
+
+    if (!referralId) {
+        throw new Error(
+            "Referral ID is missing."
+        );
+    }
 
     const formData =
         new FormData();
@@ -931,74 +978,96 @@ async function cloudinaryUpload(
     );
 
     formData.append(
-        "upload_preset",
-        CLOUDINARY_UPLOAD_PRESET
+        "referralId",
+        referralId
     );
 
     formData.append(
-        "folder",
-        folder
+        "fileType",
+        type
     );
 
     const response =
         await fetch(
-            CLOUDINARY_UPLOAD_URL,
+            WORKER_UPLOAD_URL,
             {
                 method: "POST",
-                body: formData
+
+                headers: {
+                    "Authorization":
+                        `Bearer ${firebaseToken}`
+                },
+
+                body:
+                    formData
             }
         );
 
     let data = {};
 
     try {
-
         data =
             await response.json();
 
     } catch {
-
         data = {};
     }
 
     if (
         !response.ok ||
-        !data.secure_url
+        !data.url
     ) {
 
+        console.error(
+            "Secure upload response:",
+            data
+        );
+
         throw new Error(
-            data.error?.message ||
-            `Cloudinary upload failed (${response.status}).`
+            data.message ||
+            data.error ||
+            `Secure upload failed (${response.status}).`
         );
     }
 
     return {
 
         url:
-            data.secure_url,
+            data.url,
 
         secureUrl:
-            data.secure_url,
+            data.secureUrl ||
+            data.url,
 
         publicId:
-            data.public_id || "",
+            data.publicId ||
+            "",
 
         resourceType:
-            data.resource_type || "",
+            data.resourceType ||
+            "",
 
         format:
-            data.format || "",
+            data.format ||
+            "",
 
         originalFilename:
+            data.originalFilename ||
             file.name,
 
         bytes:
+            data.bytes ||
             file.size,
 
-        type
+        type:
+            data.type ||
+            type,
+
+        version:
+            data.version ||
+            null
     };
 }
-
 
 // ============================================================
 // UPLOAD STATUS
