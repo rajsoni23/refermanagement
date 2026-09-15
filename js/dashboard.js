@@ -1,11 +1,38 @@
+// ============================================================
+// RBSK REFERRAL MANAGEMENT
+// dashboard.js
+// ============================================================
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+    getAuth,
+    onAuthStateChanged,
+    signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+    getFirestore,
+    collection,
+    doc,
+    setDoc,
+    updateDoc,
+    deleteDoc,
+    getDocs,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
 import { firebaseConfig } from "./firebase-config.js";
+
+
+// ============================================================
+// FIREBASE
+// ============================================================
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
 
 // ============================================================
 // CLOUDINARY
@@ -27,16 +54,19 @@ const ALLOWED_TYPES = [
     "image/webp"
 ];
 
+
 // ============================================================
 // GLOBALS
 // ============================================================
 
 let currentUser = null;
 let referrals = [];
+
 let editingReferralId = null;
 let statusReferralId = null;
 let deleteReferralId = null;
 let detailsReferralId = null;
+
 
 // ============================================================
 // DEFECT OPTIONS
@@ -57,91 +87,178 @@ const DEFECT_OPTIONS = [
     "50 - Congenital Eye Problems"
 ];
 
+
 // ============================================================
 // HELPERS
 // ============================================================
 
-const $ = id => document.getElementById(id);
+function $(id) {
+    return document.getElementById(id);
+}
 
-const val = id =>
-    $(id) ? String($(id).value || "").trim() : "";
 
-const today = () => {
-    const d = new Date();
+function val(id) {
+    const element = $(id);
 
-    return `${d.getFullYear()}-${String(
-        d.getMonth() + 1
-    ).padStart(2, "0")}-${String(
-        d.getDate()
-    ).padStart(2, "0")}`;
-};
+    if (!element) {
+        return "";
+    }
 
-const cleanMobile = number =>
-    String(number || "")
-        .replace(/\D/g, "")
-        .slice(-10);
+    return String(element.value || "").trim();
+}
 
-const esc = value =>
-    String(value ?? "")
+
+function escapeHtml(value) {
+    return String(value ?? "")
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
 
-const fmtDate = date => {
-    if (!date) return "—";
+
+function today() {
+
+    const d = new Date();
+
+    const year = d.getFullYear();
+
+    const month =
+        String(d.getMonth() + 1)
+            .padStart(2, "0");
+
+    const day =
+        String(d.getDate())
+            .padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+
+function cleanMobile(number) {
+
+    if (!number) {
+        return "";
+    }
+
+    return String(number)
+        .replace(/\D/g, "")
+        .slice(-10);
+}
+
+
+function formatDate(date) {
+
+    if (!date) {
+        return "—";
+    }
 
     const str = String(date);
 
     if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
-        return str.split("-").reverse().join("-");
+
+        const parts = str.split("-");
+
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
     }
 
     return str;
-};
+}
 
-const statusLabel = status => ({
-    Pending: "⏳ Pending",
-    Referred: "↗ Referred",
-    "Treatment Started": "✚ Treatment Started",
-    Completed: "✓ Completed"
-}[status] || status || "Pending");
 
-const statusClass = status =>
-    String(status || "pending")
+function statusLabel(status) {
+
+    const map = {
+
+        "Pending":
+            "⏳ Pending",
+
+        "Referred":
+            "↗ Referred",
+
+        "Treatment Started":
+            "✚ Treatment Started",
+
+        "Completed":
+            "✓ Completed"
+    };
+
+    return map[status] || status || "Pending";
+}
+
+
+function statusClass(status) {
+
+    return String(status || "pending")
         .toLowerCase()
         .replace(/\s+/g, "-");
-
-function show(id) {
-    const element = $(id);
-
-    if (!element) return;
-
-    element.style.display = "";
-    element.classList.add("active");
-    element.setAttribute("aria-hidden", "false");
 }
 
-function hide(id) {
-    const element = $(id);
-
-    if (!element) return;
-
-    element.style.display = "none";
-    element.classList.remove("active");
-    element.setAttribute("aria-hidden", "true");
-}
-
-function findRecord(id) {
-    return referrals.find(record => record.id === id);
-}
 
 // ============================================================
-// FIRESTORE
+// MODAL HELPERS
+// ============================================================
+
+function showModal(id) {
+
+    const element = $(id);
+
+    if (!element) {
+        console.error(`Modal not found: ${id}`);
+        return;
+    }
+
+    /*
+     * IMPORTANT:
+     * CSS uses .show for modal visibility.
+     */
+    element.classList.add("show");
+
+    element.classList.add("active");
+
+    element.style.display = "flex";
+
+    element.setAttribute(
+        "aria-hidden",
+        "false"
+    );
+}
+
+
+function hideModal(id) {
+
+    const element = $(id);
+
+    if (!element) {
+        return;
+    }
+
+    element.classList.remove("show");
+
+    element.classList.remove("active");
+
+    element.style.display = "none";
+
+    element.setAttribute(
+        "aria-hidden",
+        "true"
+    );
+}
+
+
+// ============================================================
+// FIRESTORE REFERENCES
 // ============================================================
 
 function referralsCollection() {
+
+    if (!currentUser) {
+        throw new Error(
+            "User is not logged in."
+        );
+    }
+
     return collection(
         db,
         "users",
@@ -150,7 +267,15 @@ function referralsCollection() {
     );
 }
 
+
 function referralDocument(id) {
+
+    if (!currentUser) {
+        throw new Error(
+            "User is not logged in."
+        );
+    }
+
     return doc(
         db,
         "users",
@@ -159,6 +284,15 @@ function referralDocument(id) {
         id
     );
 }
+
+
+function findRecord(id) {
+
+    return referrals.find(
+        record => record.id === id
+    );
+}
+
 
 // ============================================================
 // STATUS HISTORY
@@ -170,6 +304,7 @@ function buildStatusHistory(record) {
         Array.isArray(record.statusHistory) &&
         record.statusHistory.length
     ) {
+
         return record.statusHistory.map(item => ({
             status: item.status || "",
             date: item.date || ""
@@ -178,18 +313,21 @@ function buildStatusHistory(record) {
 
     const history = [];
 
-    const registeredDate =
+    const registered =
         record.registeredDate ||
-        record.registrationDate;
+        record.registrationDate ||
+        "";
 
-    if (registeredDate) {
+    if (registered) {
+
         history.push({
             status: "Pending",
-            date: registeredDate
+            date: registered
         });
     }
 
     if (record.referredDate) {
+
         history.push({
             status: "Referred",
             date: record.referredDate
@@ -197,6 +335,7 @@ function buildStatusHistory(record) {
     }
 
     if (record.treatmentStartedDate) {
+
         history.push({
             status: "Treatment Started",
             date: record.treatmentStartedDate
@@ -204,6 +343,7 @@ function buildStatusHistory(record) {
     }
 
     if (record.completedDate) {
+
         history.push({
             status: "Completed",
             date: record.completedDate
@@ -211,16 +351,22 @@ function buildStatusHistory(record) {
     }
 
     if (!history.length) {
+
         history.push({
             status: record.status || "Pending",
-            date: registeredDate || today()
+            date: registered || today()
         });
     }
 
     return history;
 }
 
-function appendHistory(record, status, date) {
+
+function appendStatusHistory(
+    record,
+    status,
+    date
+) {
 
     const history =
         buildStatusHistory(record);
@@ -232,8 +378,11 @@ function appendHistory(record, status, date) {
         last &&
         last.status === status
     ) {
+
         last.date = date;
+
     } else {
+
         history.push({
             status,
             date
@@ -242,6 +391,7 @@ function appendHistory(record, status, date) {
 
     return history;
 }
+
 
 // ============================================================
 // STATUS DATE
@@ -258,14 +408,18 @@ function ensureStatusDateField() {
         return;
     }
 
-    const form = $("statusForm");
+    const form =
+        $("statusForm");
 
-    if (!form) return;
+    if (!form) {
+        return;
+    }
 
     const wrapper =
         document.createElement("label");
 
-    wrapper.id = "statusDateWrap";
+    wrapper.id =
+        "statusDateWrap";
 
     wrapper.innerHTML = `
         Status Date
@@ -277,19 +431,25 @@ function ensureStatusDateField() {
         >
     `;
 
-    const statusField = $("newStatus");
+    const status =
+        $("newStatus");
 
     if (
-        statusField &&
-        statusField.parentElement
+        status &&
+        status.parentElement
     ) {
-        statusField.parentElement.after(wrapper);
+
+        status.parentElement.after(wrapper);
+
     } else {
+
         form.prepend(wrapper);
     }
 
-    $("statusDate").value = today();
+    $("statusDate").value =
+        today();
 }
+
 
 // ============================================================
 // OTHER HOSPITAL
@@ -306,14 +466,17 @@ function toggleOtherHospital() {
     const input =
         $("otherHospitalName");
 
-    if (!select) return;
+    if (!select) {
+        return;
+    }
 
     const isOther =
         select.value === "Other";
 
     if (wrapper) {
 
-        wrapper.hidden = !isOther;
+        wrapper.hidden =
+            !isOther;
 
         wrapper.style.display =
             isOther ? "" : "none";
@@ -321,7 +484,8 @@ function toggleOtherHospital() {
 
     if (input) {
 
-        input.required = isOther;
+        input.required =
+            isOther;
 
         if (!isOther) {
             input.value = "";
@@ -329,8 +493,9 @@ function toggleOtherHospital() {
     }
 }
 
+
 // ============================================================
-// STATUS UI
+// STATUS FIELDS
 // ============================================================
 
 function updateStatusFields() {
@@ -353,7 +518,9 @@ function updateStatusFields() {
     if (status === "Referred") {
 
         if (referTypeWrap) {
-            referTypeWrap.style.display = "";
+
+            referTypeWrap.style.display =
+                "";
         }
 
         const isPrivate =
@@ -369,6 +536,7 @@ function updateStatusFields() {
         }
 
         if (treatmentFields) {
+
             treatmentFields.style.display =
                 "none";
         }
@@ -378,17 +546,22 @@ function updateStatusFields() {
     ) {
 
         if (referTypeWrap) {
+
             referTypeWrap.style.display =
                 "none";
         }
 
         if (privateHospitalWrap) {
-            privateHospitalWrap.hidden = true;
+
+            privateHospitalWrap.hidden =
+                true;
+
             privateHospitalWrap.style.display =
                 "none";
         }
 
         if (treatmentFields) {
+
             treatmentFields.style.display =
                 "";
         }
@@ -396,17 +569,22 @@ function updateStatusFields() {
     } else {
 
         if (referTypeWrap) {
+
             referTypeWrap.style.display =
                 "none";
         }
 
         if (privateHospitalWrap) {
-            privateHospitalWrap.hidden = true;
+
+            privateHospitalWrap.hidden =
+                true;
+
             privateHospitalWrap.style.display =
                 "none";
         }
 
         if (treatmentFields) {
+
             treatmentFields.style.display =
                 "none";
         }
@@ -415,64 +593,124 @@ function updateStatusFields() {
     toggleOtherHospital();
 }
 
+
 // ============================================================
 // DEFECTS
 // ============================================================
 
-function renderDefects(selected = []) {
+function renderDefects(
+    selected = []
+) {
 
-    const box = $("defectList");
+    const box =
+        $("defectList");
 
-    if (!box) return;
+    if (!box) {
+        return;
+    }
 
-    box.innerHTML = DEFECT_OPTIONS
-        .map((defect, index) => `
-            <label class="defect-item">
+    box.innerHTML = "";
 
-                <input
-                    type="checkbox"
-                    id="defect_${index}"
-                    name="defects"
-                    value="${esc(defect)}"
-                    ${selected.includes(defect)
-                        ? "checked"
-                        : ""}
-                >
+    DEFECT_OPTIONS.forEach(
+        (defect, index) => {
 
-                <span>
-                    ${esc(defect)}
-                </span>
+            const label =
+                document.createElement("label");
 
-            </label>
-        `)
-        .join("");
+            label.className =
+                "defect-item";
 
-    box.innerHTML += `
-        <label class="defect-item">
+            const checkbox =
+                document.createElement("input");
 
-            <input
-                type="checkbox"
-                id="otherDefectCheckbox"
-                name="defects"
-                value="Other Health Condition"
-            >
+            checkbox.type =
+                "checkbox";
 
-            <span>
-                Other Health Condition
-            </span>
+            checkbox.id =
+                `defect_${index}`;
 
-        </label>
-    `;
+            checkbox.name =
+                "defects";
+
+            checkbox.value =
+                defect;
+
+            checkbox.checked =
+                selected.includes(defect);
+
+            const span =
+                document.createElement("span");
+
+            span.textContent =
+                defect;
+
+            label.appendChild(
+                checkbox
+            );
+
+            label.appendChild(
+                span
+            );
+
+            box.appendChild(
+                label
+            );
+        }
+    );
+
+    const otherLabel =
+        document.createElement("label");
+
+    otherLabel.className =
+        "defect-item";
+
+    const otherCheckbox =
+        document.createElement("input");
+
+    otherCheckbox.type =
+        "checkbox";
+
+    otherCheckbox.id =
+        "otherDefectCheckbox";
+
+    otherCheckbox.name =
+        "defects";
+
+    otherCheckbox.value =
+        "Other Health Condition";
+
+    const otherSpan =
+        document.createElement("span");
+
+    otherSpan.textContent =
+        "Other Health Condition";
+
+    otherLabel.appendChild(
+        otherCheckbox
+    );
+
+    otherLabel.appendChild(
+        otherSpan
+    );
+
+    box.appendChild(
+        otherLabel
+    );
 }
 
-function getDefects() {
+
+function getSelectedDefects() {
 
     return [
         ...document.querySelectorAll(
             '#defectList input[type="checkbox"]:checked'
         )
-    ].map(element => element.value);
+    ].map(
+        checkbox =>
+            checkbox.value
+    );
 }
+
 
 function updateOtherDefect() {
 
@@ -485,54 +723,68 @@ function updateOtherDefect() {
     const input =
         $("otherDefect");
 
-    const enabled =
-        Boolean(checkbox?.checked);
+    const checked =
+        !!checkbox?.checked;
 
     if (box) {
 
         box.classList.toggle(
             "hidden",
-            !enabled
+            !checked
         );
 
         box.style.display =
-            enabled ? "" : "none";
+            checked ? "" : "none";
     }
 
     if (input) {
 
-        input.required = enabled;
+        input.required =
+            checked;
 
-        if (!enabled) {
+        if (!checked) {
             input.value = "";
         }
     }
 }
 
+
 function setDefects(record) {
 
-    const defects =
+    let defects = [];
+
+    if (
         Array.isArray(record.defects)
-            ? record.defects
-            : (
-                record.defect
-                    ? String(record.defect)
-                        .split(",")
-                        .map(x => x.trim())
-                        .filter(Boolean)
-                    : []
-            );
+    ) {
 
-    renderDefects(defects);
+        defects =
+            [...record.defects];
 
-    if (record.otherDefect) {
+    } else if (
+        record.defect
+    ) {
 
-        if ($("otherDefectCheckbox")) {
-            $("otherDefectCheckbox").checked =
-                true;
-        }
+        defects =
+            String(record.defect)
+                .split(",")
+                .map(x => x.trim())
+                .filter(Boolean);
+    }
+
+    renderDefects(
+        defects
+    );
+
+    if (
+        record.otherDefect &&
+        $("otherDefectCheckbox")
+    ) {
+
+        $("otherDefectCheckbox").checked =
+            true;
 
         if ($("otherDefect")) {
+
             $("otherDefect").value =
                 record.otherDefect;
         }
@@ -541,8 +793,9 @@ function setDefects(record) {
     updateOtherDefect();
 }
 
+
 // ============================================================
-// INSTITUTE
+// INSTITUTE FIELDS
 // ============================================================
 
 function updateInstituteFields() {
@@ -556,7 +809,7 @@ function updateInstituteFields() {
     const awcWrap =
         $("awcWrap");
 
-    const mobileLabel =
+    const mobile3Label =
         $("mobile3Label");
 
     if (classWrap) {
@@ -581,16 +834,26 @@ function updateInstituteFields() {
                 : "none";
     }
 
-    if (mobileLabel) {
+    if (mobile3Label) {
 
-        mobileLabel.textContent =
-            type === "School"
-                ? "School Principal Mobile Number"
-                : type === "AWC"
-                    ? "AWC Worker Mobile Number"
-                    : "Mobile Number";
+        if (type === "School") {
+
+            mobile3Label.textContent =
+                "School Principal Mobile Number";
+
+        } else if (type === "AWC") {
+
+            mobile3Label.textContent =
+                "AWC Worker Mobile Number";
+
+        } else {
+
+            mobile3Label.textContent =
+                "Mobile Number";
+        }
     }
 }
+
 
 // ============================================================
 // CLOUDINARY FILE VALIDATION
@@ -602,12 +865,16 @@ function validateFile(
 ) {
 
     if (!file) {
+
         throw new Error(
             "No file selected."
         );
     }
 
-    if (file.size > MAX_FILE_SIZE) {
+    if (
+        file.size >
+        MAX_FILE_SIZE
+    ) {
 
         throw new Error(
             `${file.name} is larger than 10 MB.`
@@ -615,10 +882,13 @@ function validateFile(
     }
 
     const type =
-        String(file.type || "")
-            .toLowerCase();
+        String(
+            file.type || ""
+        ).toLowerCase();
 
-    if (!ALLOWED_TYPES.includes(type)) {
+    if (
+        !ALLOWED_TYPES.includes(type)
+    ) {
 
         throw new Error(
             `${file.name}: only PDF, JPG, PNG and WEBP files are allowed.`
@@ -635,6 +905,7 @@ function validateFile(
         );
     }
 }
+
 
 // ============================================================
 // CLOUDINARY UPLOAD
@@ -681,8 +952,12 @@ async function cloudinaryUpload(
     let data = {};
 
     try {
-        data = await response.json();
+
+        data =
+            await response.json();
+
     } catch {
+
         data = {};
     }
 
@@ -699,7 +974,8 @@ async function cloudinaryUpload(
 
     return {
 
-        url: data.secure_url,
+        url:
+            data.secure_url,
 
         secureUrl:
             data.secure_url,
@@ -723,6 +999,7 @@ async function cloudinaryUpload(
     };
 }
 
+
 // ============================================================
 // UPLOAD STATUS
 // ============================================================
@@ -735,7 +1012,9 @@ function uploadMessage(
     const element =
         $("uploadStatus");
 
-    if (!element) return;
+    if (!element) {
+        return;
+    }
 
     element.textContent =
         message;
@@ -744,23 +1023,29 @@ function uploadMessage(
         `upload-status show ${type}`;
 }
 
+
+// ============================================================
+// SELECTED FILE DISPLAY
+// ============================================================
+
 function renderSelectedFiles() {
 
     const photo =
-        $("childPhoto")?.files?.[0];
+        $("childPhoto")
+            ?.files?.[0];
 
     const documents =
-        [
-            ...(
-                $("referralDocuments")
-                    ?.files || []
-            )
-        ];
+        $("referralDocuments")
+            ?.files
+            ? [
+                ...$("referralDocuments").files
+            ]
+            : [];
 
     if ($("childPhotoSelected")) {
 
-        $("childPhotoSelected")
-            .textContent = photo
+        $("childPhotoSelected").textContent =
+            photo
                 ? `Selected: ${photo.name} (${(
                     photo.size / 1048576
                 ).toFixed(1)} MB)`
@@ -773,17 +1058,17 @@ function renderSelectedFiles() {
 
         $("referralDocumentsSelected")
             .innerHTML =
-                documents
-                    .map(
-                        file =>
-                            `• ${esc(file.name)} (${(
-                                file.size /
-                                1048576
-                            ).toFixed(1)} MB)`
-                    )
-                    .join("<br>");
+            documents
+                .map(
+                    file =>
+                        `• ${escapeHtml(file.name)} (${(
+                            file.size / 1048576
+                        ).toFixed(1)} MB)`
+                )
+                .join("<br>");
     }
 }
+
 
 // ============================================================
 // UPLOAD SELECTED FILES
@@ -795,16 +1080,17 @@ async function uploadSelectedFiles(
 ) {
 
     const photo =
-        $("childPhoto")?.files?.[0] ||
+        $("childPhoto")
+            ?.files?.[0] ||
         null;
 
     const documents =
-        [
-            ...(
-                $("referralDocuments")
-                    ?.files || []
-            )
-        ];
+        $("referralDocuments")
+            ?.files
+            ? [
+                ...$("referralDocuments").files
+            ]
+            : [];
 
     if (
         !photo &&
@@ -818,6 +1104,7 @@ async function uploadSelectedFiles(
     }
 
     if (photo) {
+
         validateFile(
             photo,
             true
@@ -825,20 +1112,23 @@ async function uploadSelectedFiles(
     }
 
     documents.forEach(
-        file => validateFile(file)
+        file =>
+            validateFile(file)
     );
 
     const total =
         (photo ? 1 : 0) +
         documents.length;
 
-    let completed = 0;
+    let completed =
+        0;
 
     uploadMessage(
         `Uploading files... 0/${total}`
     );
 
-    let photoData = null;
+    let photoData =
+        null;
 
     if (photo) {
 
@@ -856,7 +1146,8 @@ async function uploadSelectedFiles(
         );
     }
 
-    const uploadedDocuments = [];
+    const uploadedDocuments =
+        [];
 
     for (
         const file of documents
@@ -891,6 +1182,7 @@ async function uploadSelectedFiles(
     };
 }
 
+
 // ============================================================
 // FILES IN DETAILS
 // ============================================================
@@ -899,7 +1191,6 @@ function filesHtml(record) {
 
     let html = `
         <div class="details-section">
-
             <div class="details-section-title">
                 📁 Documents & Photo
             </div>
@@ -913,9 +1204,7 @@ function filesHtml(record) {
             <div class="uploaded-photo-box">
 
                 <img
-                    src="${esc(
-                        record.childPhoto.url
-                    )}"
+                    src="${escapeHtml(record.childPhoto.url)}"
                     alt="Child Photo"
                     loading="lazy"
                 >
@@ -929,9 +1218,7 @@ function filesHtml(record) {
                     <div class="uploaded-file-actions">
 
                         <a
-                            href="${esc(
-                                record.childPhoto.url
-                            )}"
+                            href="${escapeHtml(record.childPhoto.url)}"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="btn light small"
@@ -940,9 +1227,7 @@ function filesHtml(record) {
                         </a>
 
                         <a
-                            href="${esc(
-                                record.childPhoto.url
-                            )}"
+                            href="${escapeHtml(record.childPhoto.url)}"
                             target="_blank"
                             rel="noopener noreferrer"
                             class="btn primary small"
@@ -985,13 +1270,16 @@ function filesHtml(record) {
         documents.forEach(
             (file, index) => {
 
-                if (!file?.url) return;
+                if (!file?.url) {
+                    return;
+                }
 
                 html += `
                     <div class="uploaded-file-row">
 
                         <div class="uploaded-file-name">
-                            📄 ${esc(
+                            📄
+                            ${escapeHtml(
                                 file.originalFilename ||
                                 file.fileName ||
                                 `Document ${index + 1}`
@@ -1001,7 +1289,7 @@ function filesHtml(record) {
                         <div class="uploaded-file-actions">
 
                             <a
-                                href="${esc(file.url)}"
+                                href="${escapeHtml(file.url)}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="btn light small"
@@ -1010,7 +1298,7 @@ function filesHtml(record) {
                             </a>
 
                             <a
-                                href="${esc(file.url)}"
+                                href="${escapeHtml(file.url)}"
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 class="btn primary small"
@@ -1039,20 +1327,29 @@ function filesHtml(record) {
         `;
     }
 
-    return html + `
+    html += `
         </div>
     `;
+
+    return html;
 }
 
+
 // ============================================================
-// FORM RESET
+// CLEAR FORM
 // ============================================================
 
-function clearForm() {
+function clearReferralForm() {
 
-    $("referralForm")?.reset();
+    const form =
+        $("referralForm");
 
-    editingReferralId = null;
+    if (form) {
+        form.reset();
+    }
+
+    editingReferralId =
+        null;
 
     renderDefects([]);
 
@@ -1061,41 +1358,60 @@ function clearForm() {
     updateInstituteFields();
 
     if ($("referralModalTitle")) {
+
         $("referralModalTitle")
             .textContent =
             "New Referral";
     }
 
     if ($("saveReferralButton")) {
+
         $("saveReferralButton")
             .textContent =
             "Save Referral";
+
+        $("saveReferralButton")
+            .disabled =
+            false;
     }
 
     if ($("childPhoto")) {
-        $("childPhoto").value = "";
+
+        $("childPhoto").value =
+            "";
     }
 
     if ($("referralDocuments")) {
-        $("referralDocuments").value = "";
+
+        $("referralDocuments").value =
+            "";
     }
 
     if ($("uploadStatus")) {
+
         $("uploadStatus")
             .className =
             "upload-status";
+
+        $("uploadStatus")
+            .textContent =
+            "";
     }
 
     renderSelectedFiles();
 }
 
+
 // ============================================================
 // FILL EDIT FORM
 // ============================================================
 
-function fillForm(record) {
+function fillReferralForm(
+    record
+) {
 
     const fields = [
+
         "childName",
         "sex",
         "dob",
@@ -1119,48 +1435,66 @@ function fillForm(record) {
     fields.forEach(
         id => {
 
-            if ($(id)) {
-                $(id).value =
-                    record[id] ?? "";
+            const element =
+                $(id);
+
+            if (!element) {
+                return;
             }
+
+            element.value =
+                record[id] ?? "";
         }
     );
 
-    setDefects(record);
+    setDefects(
+        record
+    );
 
     updateInstituteFields();
 
-    // Existing Cloudinary files are preserved.
-    // New files can be selected separately.
-
+    /*
+     * Browser security prevents us from
+     * setting an existing file input.
+     */
     if ($("childPhoto")) {
-        $("childPhoto").value = "";
+
+        $("childPhoto").value =
+            "";
     }
 
     if ($("referralDocuments")) {
-        $("referralDocuments").value = "";
+
+        $("referralDocuments").value =
+            "";
     }
 
     renderSelectedFiles();
 }
 
+
 // ============================================================
-// NEW REFERRAL
+// NEW REFERRAL BUTTON
 // ============================================================
 
 $("newReferral")
     ?.addEventListener(
         "click",
-        () => {
+        event => {
 
-            clearForm();
+            event.preventDefault();
 
-            show("referralModal");
+            clearReferralForm();
+
+            showModal(
+                "referralModal"
+            );
         }
     );
 
+
 // ============================================================
-// CLOSE BUTTONS
+// CLOSE MODALS
 // ============================================================
 
 document
@@ -1172,22 +1506,28 @@ document
 
             button.addEventListener(
                 "click",
-                () => {
+                event => {
+
+                    event.preventDefault();
 
                     const target =
                         button.dataset.close ||
                         button.dataset.closeModal;
 
                     if (target) {
-                        hide(target);
+
+                        hideModal(
+                            target
+                        );
                     }
                 }
             );
         }
     );
 
+
 // ============================================================
-// INSTITUTE CHANGE
+// INSTITUTE TYPE
 // ============================================================
 
 $("instituteType")
@@ -1196,8 +1536,9 @@ $("instituteType")
         updateInstituteFields
     );
 
+
 // ============================================================
-// DEFECT CHANGE
+// DEFECT OTHER
 // ============================================================
 
 $("defectList")
@@ -1206,7 +1547,8 @@ $("defectList")
         event => {
 
             if (
-                event.target?.id ===
+                event.target &&
+                event.target.id ===
                 "otherDefectCheckbox"
             ) {
 
@@ -1215,8 +1557,9 @@ $("defectList")
         }
     );
 
+
 // ============================================================
-// PHOTO CHANGE
+// CHILD PHOTO
 // ============================================================
 
 $("childPhoto")
@@ -1231,6 +1574,7 @@ $("childPhoto")
                         ?.files?.[0];
 
                 if (file) {
+
                     validateFile(
                         file,
                         true
@@ -1241,7 +1585,8 @@ $("childPhoto")
 
             } catch (error) {
 
-                $("childPhoto").value = "";
+                $("childPhoto").value =
+                    "";
 
                 renderSelectedFiles();
 
@@ -1252,8 +1597,9 @@ $("childPhoto")
         }
     );
 
+
 // ============================================================
-// DOCUMENT CHANGE
+// REFERRAL DOCUMENTS
 // ============================================================
 
 $("referralDocuments")
@@ -1263,10 +1609,15 @@ $("referralDocuments")
 
             try {
 
-                [
-                    ...$("referralDocuments")
-                        .files
-                ].forEach(
+                const files =
+                    $("referralDocuments")
+                        ?.files
+                        ? [
+                            ...$("referralDocuments").files
+                        ]
+                        : [];
+
+                files.forEach(
                     file =>
                         validateFile(file)
                 );
@@ -1275,8 +1626,8 @@ $("referralDocuments")
 
             } catch (error) {
 
-                $("referralDocuments")
-                    .value = "";
+                $("referralDocuments").value =
+                    "";
 
                 renderSelectedFiles();
 
@@ -1287,43 +1638,59 @@ $("referralDocuments")
         }
     );
 
+
 // ============================================================
 // EDIT REFERRAL
 // ============================================================
 
 window.editReferral =
-    id => {
+    function (id) {
 
         const record =
             findRecord(id);
 
         if (!record) {
+
             alert(
                 "Referral record not found."
             );
+
             return;
         }
 
         editingReferralId =
             id;
 
-        fillForm(record);
+        fillReferralForm(
+            record
+        );
 
-        $("referralModalTitle")
-            .textContent =
-            "Edit Referral";
+        if ($("referralModalTitle")) {
 
-        $("saveReferralButton")
-            .textContent =
-            "Save Changes";
+            $("referralModalTitle")
+                .textContent =
+                "Edit Referral";
+        }
 
-        hide("detailsModal");
+        if ($("saveReferralButton")) {
 
-        show("referralModal");
+            $("saveReferralButton")
+                .textContent =
+                "Save Changes";
+        }
+
+        hideModal(
+            "detailsModal"
+        );
+
+        showModal(
+            "referralModal"
+        );
     };
 
+
 // ============================================================
-// SAVE REFERRAL
+// SAVE NEW / EDIT REFERRAL
 // ============================================================
 
 $("referralForm")
@@ -1339,11 +1706,14 @@ $("referralForm")
                     "Your session has expired. Please login again."
                 );
 
+                location.href =
+                    "index.html";
+
                 return;
             }
 
             const wasEditing =
-                Boolean(editingReferralId);
+                !!editingReferralId;
 
             const existing =
                 wasEditing
@@ -1368,31 +1738,54 @@ $("referralForm")
                 val("instituteName");
 
             const defects =
-                getDefects();
+                getSelectedDefects();
 
             const otherDefect =
                 val("otherDefect");
 
+
+            // -----------------------------
+            // VALIDATION
+            // -----------------------------
+
             if (!childName) {
+
                 alert(
                     "Please enter child name."
                 );
+
+                $("childName")
+                    ?.focus();
+
                 return;
             }
 
+
             if (!sex) {
+
                 alert(
                     "Please select sex."
                 );
+
+                $("sex")
+                    ?.focus();
+
                 return;
             }
 
+
             if (!dob) {
+
                 alert(
                     "Please select date of birth."
                 );
+
+                $("dob")
+                    ?.focus();
+
                 return;
             }
+
 
             if (
                 !defects.length &&
@@ -1406,14 +1799,19 @@ $("referralForm")
                 return;
             }
 
+
             if (!instituteType) {
 
                 alert(
                     "Please select institute type."
                 );
 
+                $("instituteType")
+                    ?.focus();
+
                 return;
             }
+
 
             if (!instituteName) {
 
@@ -1421,23 +1819,33 @@ $("referralForm")
                     "Please enter institute name."
                 );
 
+                $("instituteName")
+                    ?.focus();
+
                 return;
             }
 
-            const button =
+
+            const saveButton =
                 $("saveReferralButton");
 
-            if (button) {
+            if (saveButton) {
 
-                button.disabled = true;
+                saveButton.disabled =
+                    true;
 
-                button.textContent =
+                saveButton.textContent =
                     "Saving...";
             }
 
+
             try {
 
-                const referralRef =
+                // ---------------------------------
+                // Create document reference first
+                // ---------------------------------
+
+                const reference =
                     wasEditing
                         ? referralDocument(
                             editingReferralId
@@ -1447,13 +1855,19 @@ $("referralForm")
                         );
 
                 const referralId =
-                    referralRef.id;
+                    reference.id;
+
+
+                // ---------------------------------
+                // Upload files
+                // ---------------------------------
 
                 const uploaded =
                     await uploadSelectedFiles(
                         referralId,
                         childName
                     );
+
 
                 const oldDocuments =
                     Array.isArray(
@@ -1462,7 +1876,12 @@ $("referralForm")
                         ? existing.documents
                         : [];
 
-                const data = {
+
+                // ---------------------------------
+                // Referral data
+                // ---------------------------------
+
+                const referralData = {
 
                     childName,
 
@@ -1476,19 +1895,29 @@ $("referralForm")
                         ),
 
                     fatherName:
-                        val("fatherName"),
+                        val(
+                            "fatherName"
+                        ),
 
                     fatherAadhaar:
-                        val("fatherAadhaar"),
+                        val(
+                            "fatherAadhaar"
+                        ),
 
                     motherName:
-                        val("motherName"),
+                        val(
+                            "motherName"
+                        ),
 
                     motherAadhaar:
-                        val("motherAadhaar"),
+                        val(
+                            "motherAadhaar"
+                        ),
 
                     villageName:
-                        val("villageName"),
+                        val(
+                            "villageName"
+                        ),
 
                     weight:
                         val("weight"),
@@ -1500,26 +1929,25 @@ $("referralForm")
 
                     otherDefect,
 
-                    defect: [
-                        ...defects,
-                        ...(otherDefect
-                            ? [otherDefect]
-                            : [])
-                    ].join(", "),
+                    defect:
+                        [
+                            ...defects,
+                            ...(otherDefect
+                                ? [otherDefect]
+                                : [])
+                        ].join(", "),
 
                     instituteType,
 
                     instituteName,
 
                     className:
-                        instituteType ===
-                        "School"
+                        instituteType === "School"
                             ? val("className")
                             : "",
 
                     awcWorkerNumber:
-                        instituteType ===
-                        "AWC"
+                        instituteType === "AWC"
                             ? val(
                                 "awcWorkerNumber"
                             )
@@ -1545,29 +1973,42 @@ $("referralForm")
                         existing?.childPhoto ||
                         null,
 
-                    documents: [
-                        ...oldDocuments,
-                        ...uploaded.docs
-                    ],
+                    documents:
+                        [
+                            ...oldDocuments,
+                            ...uploaded.docs
+                        ],
 
                     updatedAt:
                         serverTimestamp()
                 };
 
+
+                // ---------------------------------
+                // EDIT
+                // ---------------------------------
+
                 if (wasEditing) {
 
                     await updateDoc(
-                        referralRef,
-                        data
+                        reference,
+                        referralData
                     );
 
-                } else {
+                }
+
+
+                // ---------------------------------
+                // NEW
+                // ---------------------------------
+
+                else {
 
                     const registrationDate =
                         today();
 
                     Object.assign(
-                        data,
+                        referralData,
                         {
 
                             status:
@@ -1591,30 +2032,39 @@ $("referralForm")
                             completedDate:
                                 "",
 
-                            statusHistory: [
-                                {
-                                    status:
-                                        "Pending",
+                            statusHistory:
+                                [
+                                    {
+                                        status:
+                                            "Pending",
 
-                                    date:
-                                        registrationDate
-                                }
-                            ],
+                                        date:
+                                            registrationDate
+                                    }
+                                ],
 
                             createdAt:
                                 serverTimestamp()
                         }
                     );
 
+
                     await setDoc(
-                        referralRef,
-                        data
+                        reference,
+                        referralData
                     );
                 }
 
-                hide("referralModal");
 
-                clearForm();
+                // ---------------------------------
+                // Success
+                // ---------------------------------
+
+                hideModal(
+                    "referralModal"
+                );
+
+                clearReferralForm();
 
                 await loadRecords();
 
@@ -1623,6 +2073,7 @@ $("referralForm")
                         ? "Referral updated successfully."
                         : "Referral saved successfully."
                 );
+
 
             } catch (error) {
 
@@ -1641,24 +2092,24 @@ $("referralForm")
                     error.message
                 );
 
+
             } finally {
 
-                if (button) {
+                if (saveButton) {
 
-                    button.disabled =
+                    saveButton.disabled =
                         false;
 
-                    button.textContent =
-                        editingReferralId
-                            ? "Save Changes"
-                            : "Save Referral";
+                    saveButton.textContent =
+                        "Save Referral";
                 }
             }
         }
     );
 
+
 // ============================================================
-// STATUS EVENTS
+// STATUS CHANGE
 // ============================================================
 
 $("newStatus")
@@ -1669,6 +2120,7 @@ $("newStatus")
             ensureStatusDateField();
 
             if ($("statusDate")) {
+
                 $("statusDate").value =
                     today();
             }
@@ -1677,11 +2129,17 @@ $("newStatus")
         }
     );
 
+
 $("referType")
     ?.addEventListener(
         "change",
         updateStatusFields
     );
+
+
+// ============================================================
+// PRIVATE HOSPITAL CHANGE
+// ============================================================
 
 $("privateHospital")
     ?.addEventListener(
@@ -1693,18 +2151,30 @@ $("privateHospital")
             const selected =
                 val("privateHospital");
 
+            const hospitalName =
+                $("hospitalName");
+
             if (
-                $("hospitalName") &&
+                hospitalName &&
                 selected &&
                 selected !== "Other"
             ) {
 
-                $("hospitalName")
-                    .value =
+                hospitalName.value =
                     selected;
+            }
+
+            if (
+                selected === "Other" &&
+                hospitalName
+            ) {
+
+                hospitalName.value =
+                    val("otherHospitalName");
             }
         }
     );
+
 
 $("otherHospitalName")
     ?.addEventListener(
@@ -1718,8 +2188,7 @@ $("otherHospitalName")
 
                 if ($("hospitalName")) {
 
-                    $("hospitalName")
-                        .value =
+                    $("hospitalName").value =
                         val(
                             "otherHospitalName"
                         );
@@ -1728,12 +2197,13 @@ $("otherHospitalName")
         }
     );
 
+
 // ============================================================
 // OPEN STATUS
 // ============================================================
 
 window.openStatus =
-    id => {
+    function (id) {
 
         const record =
             findRecord(id);
@@ -1752,37 +2222,71 @@ window.openStatus =
 
         ensureStatusDateField();
 
-        $("newStatus").value =
-            record.status ||
-            "Pending";
 
-        $("statusDate").value =
-            today();
+        if ($("newStatus")) {
 
-        $("referType").value =
-            record.referType ||
-            "";
+            $("newStatus").value =
+                record.status ||
+                "Pending";
+        }
 
-        $("privateHospital").value =
-            record.privateHospital ||
-            "";
 
-        $("otherHospitalName").value =
-            record.otherHospitalName ||
-            "";
+        if ($("statusDate")) {
 
-        $("hospitalName").value =
-            record.hospitalName ||
-            "";
+            $("statusDate").value =
+                today();
+        }
 
-        $("estimatedExpenditure").value =
-            record.estimatedExpenditure ||
-            "";
+
+        if ($("referType")) {
+
+            $("referType").value =
+                record.referType ||
+                "";
+        }
+
+
+        if ($("privateHospital")) {
+
+            $("privateHospital").value =
+                record.privateHospital ||
+                "";
+        }
+
+
+        if ($("otherHospitalName")) {
+
+            $("otherHospitalName").value =
+                record.otherHospitalName ||
+                "";
+        }
+
+
+        if ($("hospitalName")) {
+
+            $("hospitalName").value =
+                record.hospitalName ||
+                "";
+        }
+
+
+        if ($("estimatedExpenditure")) {
+
+            $("estimatedExpenditure").value =
+                record.estimatedExpenditure ||
+                "";
+        }
+
 
         updateStatusFields();
 
-        show("statusModal");
+        toggleOtherHospital();
+
+        showModal(
+            "statusModal"
+        );
     };
+
 
 // ============================================================
 // SAVE STATUS
@@ -1799,6 +2303,7 @@ $("statusForm")
                 !currentUser ||
                 !statusReferralId
             ) {
+
                 return;
             }
 
@@ -1816,11 +2321,14 @@ $("statusForm")
                 return;
             }
 
-            const status =
+            ensureStatusDateField();
+
+
+            const newStatus =
                 val("newStatus") ||
                 "Pending";
 
-            const date =
+            const statusDate =
                 val("statusDate") ||
                 today();
 
@@ -1830,11 +2338,24 @@ $("statusForm")
             const privateHospital =
                 val("privateHospital");
 
-            const otherHospital =
+            const otherHospitalName =
                 val("otherHospitalName");
 
+            const hospitalName =
+                val("hospitalName");
+
+            const estimatedExpenditure =
+                val(
+                    "estimatedExpenditure"
+                );
+
+
+            // ---------------------------------
+            // VALIDATION
+            // ---------------------------------
+
             if (
-                status === "Referred" &&
+                newStatus === "Referred" &&
                 !referType
             ) {
 
@@ -1842,13 +2363,17 @@ $("statusForm")
                     "Please select Refer Type."
                 );
 
+                $("referType")
+                    ?.focus();
+
                 return;
             }
 
+
             if (
-                status === "Referred" &&
+                newStatus === "Referred" &&
                 referType ===
-                    "Private Hospital" &&
+                "Private Hospital" &&
                 !privateHospital
             ) {
 
@@ -1856,119 +2381,160 @@ $("statusForm")
                     "Please select Hospital Name."
                 );
 
+                $("privateHospital")
+                    ?.focus();
+
                 return;
             }
 
+
             if (
-                status === "Referred" &&
+                newStatus === "Referred" &&
                 referType ===
-                    "Private Hospital" &&
+                "Private Hospital" &&
                 privateHospital ===
-                    "Other" &&
-                !otherHospital
+                "Other" &&
+                !otherHospitalName
             ) {
 
                 alert(
                     "Please enter Other Hospital Name."
                 );
 
+                $("otherHospitalName")
+                    ?.focus();
+
                 return;
             }
 
-            const data = {
 
-                status,
+            const newHistory =
+                appendStatusHistory(
+                    record,
+                    newStatus,
+                    statusDate
+                );
+
+
+            const updateData = {
+
+                status:
+                    newStatus,
 
                 statusDate:
-                    date,
+                    statusDate,
 
                 statusHistory:
-                    appendHistory(
-                        record,
-                        status,
-                        date
-                    ),
+                    newHistory,
 
                 updatedAt:
                     serverTimestamp()
             };
 
+
+            // ---------------------------------
+            // REFERRED
+            // ---------------------------------
+
             if (
-                status === "Referred"
+                newStatus ===
+                "Referred"
             ) {
 
-                data.referType =
+                updateData.referType =
                     referType;
 
-                data.referredDate =
-                    date;
+                updateData.referredDate =
+                    statusDate;
 
-                data.privateHospital =
+                if (
                     referType ===
                     "Private Hospital"
-                        ? privateHospital
-                        : "";
+                ) {
 
-                data.otherHospitalName =
-                    referType ===
-                        "Private Hospital" &&
-                    privateHospital ===
+                    updateData.privateHospital =
+                        privateHospital;
+
+                    updateData.otherHospitalName =
+                        privateHospital ===
                         "Other"
-                        ? otherHospital
-                        : "";
+                            ? otherHospitalName
+                            : "";
 
-                data.hospitalName =
-                    referType ===
-                        "Private Hospital"
-                        ? (
-                            privateHospital ===
-                            "Other"
-                                ? otherHospital
-                                : privateHospital
-                        )
-                        : "DEIC";
+                    updateData.hospitalName =
+                        privateHospital ===
+                        "Other"
+                            ? otherHospitalName
+                            : privateHospital;
+
+                } else {
+
+                    updateData.privateHospital =
+                        "";
+
+                    updateData.otherHospitalName =
+                        "";
+
+                    updateData.hospitalName =
+                        "DEIC";
+                }
             }
 
+
+            // ---------------------------------
+            // TREATMENT STARTED
+            // ---------------------------------
+
             if (
-                status ===
+                newStatus ===
                 "Treatment Started"
             ) {
 
-                data.treatmentStartedDate =
-                    date;
+                updateData.treatmentStartedDate =
+                    statusDate;
 
-                data.hospitalName =
-                    val("hospitalName");
+                updateData.hospitalName =
+                    hospitalName;
 
-                data.estimatedExpenditure =
-                    val(
-                        "estimatedExpenditure"
-                    );
+                updateData.estimatedExpenditure =
+                    estimatedExpenditure;
             }
 
+
+            // ---------------------------------
+            // COMPLETED
+            // ---------------------------------
+
             if (
-                status ===
+                newStatus ===
                 "Completed"
             ) {
 
-                data.completedDate =
-                    date;
+                updateData.completedDate =
+                    statusDate;
             }
 
+
+            // ---------------------------------
+            // PENDING
+            // ---------------------------------
+
             if (
-                status ===
+                newStatus ===
                 "Pending"
             ) {
 
-                data.registeredDate =
-                    date;
+                updateData.registeredDate =
+                    statusDate;
             }
+
 
             const button =
                 $("statusForm")
-                    .querySelector(
+                    ?.querySelector(
                         'button[type="submit"]'
                     );
+
 
             try {
 
@@ -1981,23 +2547,29 @@ $("statusForm")
                         "Saving...";
                 }
 
+
                 await updateDoc(
                     referralDocument(
                         statusReferralId
                     ),
-                    data
+                    updateData
                 );
 
-                hide("statusModal");
+
+                hideModal(
+                    "statusModal"
+                );
 
                 statusReferralId =
                     null;
 
                 await loadRecords();
 
+
                 alert(
                     "Status updated successfully."
                 );
+
 
             } catch (error) {
 
@@ -2010,6 +2582,7 @@ $("statusForm")
                     "Unable to update status.\n\n" +
                     error.message
                 );
+
 
             } finally {
 
@@ -2024,6 +2597,7 @@ $("statusForm")
             }
         }
     );
+
 
 // ============================================================
 // STATUS HISTORY HTML
@@ -2041,19 +2615,19 @@ function historyHtml(record) {
 
             ${history.map(
                 (item, index) => `
+
                     <div
-                        class="
-                            status-history-item
-                            ${
-                                index ===
-                                history.length - 1
-                                    ? "current"
-                                    : ""
-                            }
-                        "
+                        class="status-history-item ${
+                            index ===
+                            history.length - 1
+                                ? "current"
+                                : ""
+                        }"
                     >
 
-                        <div class="status-history-dot">
+                        <div
+                            class="status-history-dot"
+                        >
                             ${
                                 index ===
                                 history.length - 1
@@ -2062,19 +2636,25 @@ function historyHtml(record) {
                             }
                         </div>
 
-                        <div class="status-history-content">
+                        <div
+                            class="status-history-content"
+                        >
 
-                            <div class="status-history-status">
-                                ${esc(
+                            <div
+                                class="status-history-status"
+                            >
+                                ${escapeHtml(
                                     statusLabel(
                                         item.status
                                     )
                                 )}
                             </div>
 
-                            <div class="status-history-date">
-                                ${esc(
-                                    fmtDate(
+                            <div
+                                class="status-history-date"
+                            >
+                                ${escapeHtml(
+                                    formatDate(
                                         item.date
                                     )
                                 )}
@@ -2083,19 +2663,20 @@ function historyHtml(record) {
                         </div>
 
                     </div>
-                `
+            `
             ).join("")}
 
         </div>
     `;
 }
 
+
 // ============================================================
 // VIEW DETAILS
 // ============================================================
 
 window.viewDetails =
-    id => {
+    function (id) {
 
         const record =
             findRecord(id);
@@ -2112,23 +2693,40 @@ window.viewDetails =
         detailsReferralId =
             id;
 
-        $("detailsSubtitle")
-            .textContent =
-            `${record.childName || ""} • ${
-                record.instituteName || ""
-            }`;
+
+        if ($("detailsSubtitle")) {
+
+            $("detailsSubtitle")
+                .textContent =
+                `${record.childName || ""} • ${record.instituteName || ""}`;
+        }
+
 
         const defects =
-            Array.isArray(record.defects)
+            Array.isArray(
+                record.defects
+            )
                 ? record.defects
                 : (
                     record.defect
-                        ? String(record.defect)
+                        ? String(
+                            record.defect
+                        )
                             .split(",")
-                            .map(x => x.trim())
+                            .map(
+                                x =>
+                                    x.trim()
+                            )
                             .filter(Boolean)
                         : []
                 );
+
+
+        if (!$("detailsContent")) {
+
+            return;
+        }
+
 
         $("detailsContent")
             .innerHTML = `
@@ -2145,8 +2743,9 @@ window.viewDetails =
                         <small>
                             Child Name
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.childName
                             )}
                         </strong>
@@ -2156,8 +2755,9 @@ window.viewDetails =
                         <small>
                             Sex
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.sex
                             )}
                         </strong>
@@ -2167,9 +2767,10 @@ window.viewDetails =
                         <small>
                             Date of Birth
                         </small>
+
                         <strong>
-                            ${esc(
-                                fmtDate(
+                            ${escapeHtml(
+                                formatDate(
                                     record.dob
                                 )
                             )}
@@ -2180,8 +2781,9 @@ window.viewDetails =
                         <small>
                             Birth Certificate No.
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.birthCertificateNo ||
                                 "—"
                             )}
@@ -2192,8 +2794,9 @@ window.viewDetails =
                         <small>
                             Village
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.villageName ||
                                 "—"
                             )}
@@ -2204,8 +2807,9 @@ window.viewDetails =
                         <small>
                             Weight
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.weight ||
                                 "—"
                             )}
@@ -2216,8 +2820,9 @@ window.viewDetails =
                         <small>
                             Height
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.height ||
                                 "—"
                             )}
@@ -2241,8 +2846,9 @@ window.viewDetails =
                         <small>
                             Father Name
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.fatherName ||
                                 "—"
                             )}
@@ -2253,8 +2859,9 @@ window.viewDetails =
                         <small>
                             Father Aadhaar
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.fatherAadhaar ||
                                 "—"
                             )}
@@ -2265,8 +2872,9 @@ window.viewDetails =
                         <small>
                             Mother Name
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.motherName ||
                                 "—"
                             )}
@@ -2277,8 +2885,9 @@ window.viewDetails =
                         <small>
                             Mother Aadhaar
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.motherAadhaar ||
                                 "—"
                             )}
@@ -2300,15 +2909,12 @@ window.viewDetails =
 
                     ${
                         defects.length
-                            ? defects.map(
-                                defect => `
-                                    <span class="defect-tag">
-                                        ${esc(
-                                            defect
-                                        )}
-                                    </span>
-                                `
-                            ).join("")
+                            ? defects
+                                .map(
+                                    defect =>
+                                        `<span class="defect-tag">${escapeHtml(defect)}</span>`
+                                )
+                                .join("")
                             : "—"
                     }
 
@@ -2324,7 +2930,7 @@ window.viewDetails =
                                 </small>
 
                                 <strong>
-                                    ${esc(
+                                    ${escapeHtml(
                                         record.otherDefect
                                     )}
                                 </strong>
@@ -2349,8 +2955,9 @@ window.viewDetails =
                         <small>
                             Institute Type
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.instituteType ||
                                 "—"
                             )}
@@ -2361,8 +2968,9 @@ window.viewDetails =
                         <small>
                             Institute Name
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.instituteName ||
                                 "—"
                             )}
@@ -2373,8 +2981,9 @@ window.viewDetails =
                         <small>
                             Class
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.className ||
                                 "—"
                             )}
@@ -2385,8 +2994,9 @@ window.viewDetails =
                         <small>
                             AWC Worker Number
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.awcWorkerNumber ||
                                 "—"
                             )}
@@ -2410,8 +3020,9 @@ window.viewDetails =
                         <small>
                             Mobile 1
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.mobile1 ||
                                 "—"
                             )}
@@ -2422,8 +3033,9 @@ window.viewDetails =
                         <small>
                             Mobile 2
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.mobile2 ||
                                 "—"
                             )}
@@ -2434,8 +3046,9 @@ window.viewDetails =
                         <small>
                             Mobile 3
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.mobile3 ||
                                 "—"
                             )}
@@ -2473,8 +3086,9 @@ window.viewDetails =
                         <small>
                             Current Status
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 statusLabel(
                                     record.status
                                 )
@@ -2486,9 +3100,10 @@ window.viewDetails =
                         <small>
                             Registered Date
                         </small>
+
                         <strong>
-                            ${esc(
-                                fmtDate(
+                            ${escapeHtml(
+                                formatDate(
                                     record.registeredDate ||
                                     record.registrationDate
                                 )
@@ -2500,9 +3115,10 @@ window.viewDetails =
                         <small>
                             Referred Date
                         </small>
+
                         <strong>
-                            ${esc(
-                                fmtDate(
+                            ${escapeHtml(
+                                formatDate(
                                     record.referredDate
                                 )
                             )}
@@ -2513,9 +3129,10 @@ window.viewDetails =
                         <small>
                             Treatment Started
                         </small>
+
                         <strong>
-                            ${esc(
-                                fmtDate(
+                            ${escapeHtml(
+                                formatDate(
                                     record.treatmentStartedDate
                                 )
                             )}
@@ -2526,9 +3143,10 @@ window.viewDetails =
                         <small>
                             Completed Date
                         </small>
+
                         <strong>
-                            ${esc(
-                                fmtDate(
+                            ${escapeHtml(
+                                formatDate(
                                     record.completedDate
                                 )
                             )}
@@ -2539,8 +3157,9 @@ window.viewDetails =
                         <small>
                             Refer Type
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.referType ||
                                 "—"
                             )}
@@ -2551,8 +3170,9 @@ window.viewDetails =
                         <small>
                             Hospital
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.hospitalName ||
                                 record.privateHospital ||
                                 "—"
@@ -2564,8 +3184,9 @@ window.viewDetails =
                         <small>
                             Estimated Expenditure
                         </small>
+
                         <strong>
-                            ${esc(
+                            ${escapeHtml(
                                 record.estimatedExpenditure ||
                                 "—"
                             )}
@@ -2577,13 +3198,19 @@ window.viewDetails =
             </div>
         `;
 
-        hide("referralModal");
 
-        show("detailsModal");
+        hideModal(
+            "referralModal"
+        );
+
+        showModal(
+            "detailsModal"
+        );
     };
 
+
 // ============================================================
-// DETAILS EDIT
+// DETAILS EDIT BUTTON
 // ============================================================
 
 $("detailsEdit")
@@ -2591,7 +3218,9 @@ $("detailsEdit")
         "click",
         () => {
 
-            if (detailsReferralId) {
+            if (
+                detailsReferralId
+            ) {
 
                 window.editReferral(
                     detailsReferralId
@@ -2600,12 +3229,13 @@ $("detailsEdit")
         }
     );
 
+
 // ============================================================
-// DELETE
+// DELETE REFERRAL
 // ============================================================
 
 window.deleteReferral =
-    id => {
+    function (id) {
 
         const record =
             findRecord(id);
@@ -2630,28 +3260,43 @@ window.deleteReferral =
                 "";
         }
 
-        show("deleteModal");
+        showModal(
+            "deleteModal"
+        );
     };
+
+
+// ============================================================
+// CONFIRM DELETE
+// ============================================================
 
 $("confirmDelete")
     ?.addEventListener(
         "click",
         async () => {
 
-            if (!deleteReferralId) {
+            if (
+                !deleteReferralId
+            ) {
+
                 return;
             }
 
             const button =
                 $("confirmDelete");
 
+
             try {
 
-                button.disabled =
-                    true;
+                if (button) {
 
-                button.textContent =
-                    "Deleting...";
+                    button.disabled =
+                        true;
+
+                    button.textContent =
+                        "Deleting...";
+                }
+
 
                 await deleteDoc(
                     referralDocument(
@@ -2659,16 +3304,21 @@ $("confirmDelete")
                     )
                 );
 
+
                 deleteReferralId =
                     null;
 
-                hide("deleteModal");
+                hideModal(
+                    "deleteModal"
+                );
 
                 await loadRecords();
+
 
                 alert(
                     "Referral deleted successfully."
                 );
+
 
             } catch (error) {
 
@@ -2682,16 +3332,46 @@ $("confirmDelete")
                     error.message
                 );
 
+
             } finally {
 
-                button.disabled =
-                    false;
+                if (button) {
 
-                button.textContent =
-                    "Delete Referral";
+                    button.disabled =
+                        false;
+
+                    button.textContent =
+                        "Delete Referral";
+                }
             }
         }
     );
+
+
+// ============================================================
+// SEARCH / FILTER
+// ============================================================
+
+$("search")
+    ?.addEventListener(
+        "input",
+        renderRecords
+    );
+
+
+$("statusFilter")
+    ?.addEventListener(
+        "change",
+        renderRecords
+    );
+
+
+$("typeFilter")
+    ?.addEventListener(
+        "change",
+        renderRecords
+    );
+
 
 // ============================================================
 // RENDER RECORDS
@@ -2699,13 +3379,16 @@ $("confirmDelete")
 
 function renderRecords() {
 
-    const box =
+    const container =
         $("records");
 
-    if (!box) return;
+    if (!container) {
+        return;
+    }
 
     const search =
-        val("search").toLowerCase();
+        val("search")
+            .toLowerCase();
 
     const statusFilter =
         val("statusFilter");
@@ -2713,43 +3396,66 @@ function renderRecords() {
     const typeFilter =
         val("typeFilter");
 
-    const list =
+
+    const filtered =
         referrals.filter(
             record => {
 
-                const searchable = [
+                const text = [
+
                     record.childName,
+
                     record.fatherName,
+
                     record.motherName,
+
                     record.villageName,
+
                     record.instituteName,
+
                     record.mobile1,
+
                     record.mobile2,
+
                     record.mobile3,
+
                     record.defect,
+
                     record.otherDefect
+
                 ]
                     .join(" ")
                     .toLowerCase();
 
+
                 return (
-                    (!search ||
-                        searchable.includes(
-                            search
-                        )) &&
-                    (!statusFilter ||
-                        record.status ===
-                            statusFilter) &&
-                    (!typeFilter ||
-                        record.instituteType ===
-                            typeFilter)
+
+                    !search ||
+                    text.includes(
+                        search
+                    )
+
+                ) && (
+
+                    !statusFilter ||
+                    record.status ===
+                    statusFilter
+
+                ) && (
+
+                    !typeFilter ||
+                    record.instituteType ===
+                    typeFilter
+
                 );
             }
         );
 
-    if (!list.length) {
 
-        box.innerHTML = `
+    if (!filtered.length) {
+
+        container.innerHTML = `
+
             <div class="empty-state">
 
                 <div class="empty-icon">
@@ -2772,161 +3478,162 @@ function renderRecords() {
         return;
     }
 
-    box.innerHTML =
-        list.map(
-            record => {
 
-                const status =
-                    record.status ||
-                    "Pending";
+    container.innerHTML =
+        filtered
+            .map(
+                record => {
 
-                return `
-                    <article
-                        class="
-                            referral-card
-                            status-${esc(
+                    const status =
+                        record.status ||
+                        "Pending";
+
+                    return `
+
+                        <article
+                            class="referral-card status-${escapeHtml(
                                 statusClass(
                                     status
                                 )
-                            )}
-                        "
-                    >
-
-                        <div
-                            class="referral-card-top"
+                            )}"
                         >
 
                             <div
-                                class="child-info"
+                                class="referral-card-top"
                             >
 
-                                <h3>
-                                    ${esc(
-                                        record.childName ||
-                                        "Unnamed Child"
+                                <div
+                                    class="child-info"
+                                >
+
+                                    <h3>
+                                        ${escapeHtml(
+                                            record.childName ||
+                                            "Unnamed Child"
+                                        )}
+                                    </h3>
+
+                                    <div
+                                        class="child-meta"
+                                    >
+                                        ${escapeHtml(
+                                            record.sex ||
+                                            ""
+                                        )}
+
+                                        ${
+                                            record.dob
+                                                ? ` • DOB: ${escapeHtml(
+                                                    formatDate(
+                                                        record.dob
+                                                    )
+                                                )}`
+                                                : ""
+                                        }
+                                    </div>
+
+                                </div>
+
+
+                                <span
+                                    class="status-badge ${escapeHtml(
+                                        statusClass(
+                                            status
+                                        )
+                                    )}"
+                                >
+                                    ${escapeHtml(
+                                        statusLabel(
+                                            status
+                                        )
                                     )}
-                                </h3>
+                                </span>
+
+                            </div>
+
+
+                            <div
+                                class="referral-card-body"
+                            >
 
                                 <div
-                                    class="child-meta"
+                                    class="record-info"
                                 >
-                                    ${esc(
-                                        record.sex ||
-                                        ""
-                                    )}
 
-                                    ${
-                                        record.dob
-                                            ? ` • DOB: ${esc(
-                                                fmtDate(
-                                                    record.dob
-                                                )
-                                            )}`
-                                            : ""
-                                    }
+                                    <span>
+                                        🏥
+                                        ${escapeHtml(
+                                            record.instituteName ||
+                                            "—"
+                                        )}
+                                    </span>
+
+                                    <span>
+                                        📍
+                                        ${escapeHtml(
+                                            record.villageName ||
+                                            "—"
+                                        )}
+                                    </span>
+
+                                    <span>
+                                        ❤️
+                                        ${escapeHtml(
+                                            record.defect ||
+                                            "—"
+                                        )}
+                                    </span>
+
                                 </div>
 
                             </div>
 
-                            <span
-                                class="
-                                    status-badge
-                                    ${esc(
-                                        statusClass(
-                                            status
-                                        )
-                                    )}
-                                "
-                            >
-                                ${esc(
-                                    statusLabel(
-                                        status
-                                    )
-                                )}
-                            </span>
-
-                        </div>
-
-
-                        <div
-                            class="referral-card-body"
-                        >
 
                             <div
-                                class="record-info"
+                                class="referral-card-actions"
                             >
 
-                                <span>
-                                    🏥
-                                    ${esc(
-                                        record.instituteName ||
-                                        "—"
-                                    )}
-                                </span>
+                                <button
+                                    type="button"
+                                    onclick="viewDetails('${escapeHtml(record.id)}')"
+                                >
+                                    View
+                                </button>
 
-                                <span>
-                                    📍
-                                    ${esc(
-                                        record.villageName ||
-                                        "—"
-                                    )}
-                                </span>
+                                <button
+                                    type="button"
+                                    onclick="editReferral('${escapeHtml(record.id)}')"
+                                >
+                                    Edit
+                                </button>
 
-                                <span>
-                                    ❤️
-                                    ${esc(
-                                        record.defect ||
-                                        "—"
-                                    )}
-                                </span>
+                                <button
+                                    type="button"
+                                    onclick="openStatus('${escapeHtml(record.id)}')"
+                                >
+                                    Update Status
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="danger"
+                                    onclick="deleteReferral('${escapeHtml(record.id)}')"
+                                >
+                                    Delete
+                                </button>
 
                             </div>
 
-                        </div>
+                        </article>
+                    `;
+                }
+            )
+            .join("");
 
-
-                        <div
-                            class="referral-card-actions"
-                        >
-
-                            <button
-                                type="button"
-                                onclick="viewDetails('${record.id}')"
-                            >
-                                View
-                            </button>
-
-                            <button
-                                type="button"
-                                onclick="editReferral('${record.id}')"
-                            >
-                                Edit
-                            </button>
-
-                            <button
-                                type="button"
-                                onclick="openStatus('${record.id}')"
-                            >
-                                Update Status
-                            </button>
-
-                            <button
-                                type="button"
-                                class="danger"
-                                onclick="deleteReferral('${record.id}')"
-                            >
-                                Delete
-                            </button>
-
-                        </div>
-
-                    </article>
-                `;
-            }
-        ).join("");
 
     updateStats();
 }
+
 
 // ============================================================
 // STATS
@@ -2944,55 +3651,44 @@ function updateStats() {
                     ) === status
             ).length;
 
+
     if ($("total")) {
+
         $("total").textContent =
             referrals.length;
     }
 
+
     if ($("pending")) {
+
         $("pending").textContent =
             count("Pending");
     }
 
+
     if ($("referred")) {
+
         $("referred").textContent =
             count("Referred");
     }
 
+
     if ($("started")) {
+
         $("started").textContent =
             count(
                 "Treatment Started"
             );
     }
 
+
     if ($("completed")) {
+
         $("completed").textContent =
             count("Completed");
     }
 }
 
-// ============================================================
-// SEARCH
-// ============================================================
-
-$("search")
-    ?.addEventListener(
-        "input",
-        renderRecords
-    );
-
-$("statusFilter")
-    ?.addEventListener(
-        "change",
-        renderRecords
-    );
-
-$("typeFilter")
-    ?.addEventListener(
-        "change",
-        renderRecords
-    );
 
 // ============================================================
 // LOAD RECORDS
@@ -3000,19 +3696,23 @@ $("typeFilter")
 
 async function loadRecords() {
 
-    if (!currentUser) return;
+    if (!currentUser) {
+        return;
+    }
 
-    const box =
+    const container =
         $("records");
 
-    if (box) {
+    if (container) {
 
-        box.innerHTML = `
+        container.innerHTML = `
+
             <div class="loading-state">
                 Loading referrals...
             </div>
         `;
     }
+
 
     try {
 
@@ -3021,34 +3721,41 @@ async function loadRecords() {
                 referralsCollection()
             );
 
+
         referrals =
             snapshot.docs.map(
-                document => ({
-                    id: document.id,
-                    ...document.data()
+                item => ({
+
+                    id:
+                        item.id,
+
+                    ...item.data()
                 })
             );
+
 
         referrals.sort(
             (a, b) => {
 
-                const dateA =
+                const aDate =
                     a.registeredDate ||
                     a.registrationDate ||
                     "";
 
-                const dateB =
+                const bDate =
                     b.registeredDate ||
                     b.registrationDate ||
                     "";
 
-                return dateB.localeCompare(
-                    dateA
+                return bDate.localeCompare(
+                    aDate
                 );
             }
         );
 
+
         renderRecords();
+
 
     } catch (error) {
 
@@ -3057,9 +3764,10 @@ async function loadRecords() {
             error
         );
 
-        if (box) {
+        if (container) {
 
-            box.innerHTML = `
+            container.innerHTML = `
+
                 <div class="empty-state">
 
                     <div class="empty-icon">
@@ -3071,7 +3779,7 @@ async function loadRecords() {
                     </h3>
 
                     <p>
-                        ${esc(
+                        ${escapeHtml(
                             error.message
                         )}
                     </p>
@@ -3081,6 +3789,7 @@ async function loadRecords() {
         }
     }
 }
+
 
 // ============================================================
 // LOGOUT
@@ -3093,7 +3802,9 @@ $("logout")
 
             try {
 
-                await signOut(auth);
+                await signOut(
+                    auth
+                );
 
                 location.href =
                     "index.html";
@@ -3112,8 +3823,9 @@ $("logout")
         }
     );
 
+
 // ============================================================
-// AUTH
+// AUTH STATE
 // ============================================================
 
 onAuthStateChanged(
@@ -3131,8 +3843,10 @@ onAuthStateChanged(
             return;
         }
 
+
         currentUser =
             user;
+
 
         if ($("userMobile")) {
 
@@ -3142,6 +3856,7 @@ onAuthStateChanged(
                 user.phoneNumber ||
                 "";
         }
+
 
         ensureStatusDateField();
 
@@ -3153,14 +3868,17 @@ onAuthStateChanged(
 
         updateStatusFields();
 
+        toggleOtherHospital();
+
         renderSelectedFiles();
 
         await loadRecords();
     }
 );
 
+
 // ============================================================
-// INITIAL UI
+// INITIAL UI SETUP
 // ============================================================
 
 document.addEventListener(
@@ -3183,8 +3901,9 @@ document.addEventListener(
     }
 );
 
+
 // ============================================================
-// ESC KEY
+// ESCAPE KEY - CLOSE MODALS
 // ============================================================
 
 document.addEventListener(
@@ -3195,6 +3914,7 @@ document.addEventListener(
             event.key !==
             "Escape"
         ) {
+
             return;
         }
 
@@ -3203,33 +3923,17 @@ document.addEventListener(
             "statusModal",
             "detailsModal",
             "deleteModal"
-        ].forEach(
-            id => {
-
-                const element =
-                    $(id);
-
-                if (
-                    element &&
-                    (
-                        element.classList
-                            .contains(
-                                "active"
-                            ) ||
-                        element.style.display !==
-                            "none"
-                    )
-                ) {
-
-                    hide(id);
-                }
-            }
-        );
+        ]
+            .forEach(
+                id =>
+                    hideModal(id)
+            );
     }
 );
 
+
 // ============================================================
-// GLOBAL
+// GLOBAL API
 // ============================================================
 
 window.RBSK = {
@@ -3243,5 +3947,4 @@ window.RBSK = {
     today,
 
     cloudinaryUpload
-
 };
