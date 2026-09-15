@@ -44,7 +44,7 @@ const CLOUDINARY_UPLOAD_PRESET = "rbsk_upload";
 const CLOUDINARY_UPLOAD_URL =
     `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/auto/upload`;
 
-const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
 
 const MAX_FILE_SIZE =
     10 * 1024 * 1024;
